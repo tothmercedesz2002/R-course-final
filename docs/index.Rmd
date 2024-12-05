@@ -1,0 +1,28 @@
+---
+title: "Analysis of Animal Rescues (tidytuesday)"
+author: "Tóth Mercédesz"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# About the dataset
+The dataset includes data about the London Fire Brigade's animal rescues since January 2009. As provided in the official dataset description, in 2020, there was a 20% increase in rescues compared to 2019. The biggest increase was observed among non-domestic animals.
+
+# Setup
+## Loading packages
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
+library(skimr)
+library(correlation)
+library(performance)
+library(broom)
+library(car)
+library(lmtest)
+library(ggcorrplot)
+library(lm.beta)
+library(ggfortify)
+```
+## Reading the dataset
+```{r}
+animal_rescues <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
+```
