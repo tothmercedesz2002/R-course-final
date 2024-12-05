@@ -5,10 +5,18 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-# About the dataset
-The dataset includes data about the London Fire Brigade's animal rescues since January 2009. As provided in the official dataset description, in 2020, there was a 20% increase in rescues compared to 2019. The biggest increase was observed among non-domestic animals.
+# 🐾 About the dataset 🐾
+The dataset includes data about the London Fire Brigade's **animal rescues** since **January 2009**. As provided in the official dataset description, in **2020**, there was a **20% increase** in rescues compared to 2019. The biggest increase was observed among **non-domestic animals**.
 
-# Setup
+# 🐾 Goals of this analysis 🐾
+In this analysis, I will:
+- confirm the rise in rescues in 2020;
+- compare the rise in domestic and non-domestic animal rescues in 2020;
+- investigate whether non-domestic animals' rescue costs more money  than domestic animals' rescue by fitting linear regression model
+- investigate what other factors influence rescue cost with a more complex linear regression model
+- compare the simple and the more complex models' performance
+
+# 🐾 Setup 🐾
 ## Loading packages
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
