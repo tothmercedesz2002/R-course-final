@@ -90,5 +90,35 @@ library(lubridate)
 ## Reading the dataset
 
 ```{r}
-animal_rescues <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
+animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
+```
+
+# 🐾 Exploratory data analysis 🐾
+
+## Exploring the dataset
+
+```{r}
+# Checking structure and variables' type
+str(animal_rescues_raw)
+
+# Selecting variables of interest
+animal_rescues_interest <- 
+  animal_rescues_raw %>%
+  select(date_time_of_call, cal_year, pump_count, pump_hours_total, incident_notional_cost, animal_group_parent, property_category, borough)
+
+# Converting variables
+animal_rescues_interest <- mutate(
+  date_time_of_call = date_time_of_call(date_time_of_call),
+  pump_count = as.numeric(pump_count),
+  pump_hours_total = as.numeric(pump_hours_total),
+  incident_notional_cost = as.numeric(incident_notional_cost)
+  animal_group_parent = as.factor(animal_group_parent),
+  property_category = as.factor(property_category),
+  borough = as.factor(borough)
+  )
+
+
+
+
+
 ```
