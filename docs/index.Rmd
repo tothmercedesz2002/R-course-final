@@ -6,18 +6,26 @@ editor_options:
   chunk_output_type: console
 ---
 # 🐾 About the dataset 🐾
+
 The dataset includes data about the London Fire Brigade's **animal rescues** since **January 2009**. As provided in the official dataset description, in **2020**, there was a **20% increase** in rescues compared to 2019. The biggest increase was observed among **non-domestic animals**.
 
 # 🐾 Goals of this analysis 🐾
+
 In this analysis, I will:
 - confirm the rise in rescues in 2020;
 - compare the rise in domestic and non-domestic animal rescues in 2020;
-- investigate whether non-domestic animals' rescue costs more money  than domestic animals' rescue by fitting linear regression model
-- investigate what other factors influence rescue cost with a more complex linear regression model
-- compare the simple and the more complex models' performance
+- investigate whether non-domestic animals' rescue costs more money  than domestic animals' rescue by fitting linear regression model;
+- investigate what other factors influence rescue cost with a more complex linear regression model;
+- compare the simple and the more complex models' performance.
+
+![](https://unsplash.com/photos/brown-animal-on-green-grass-CQl3Y5bV6FA?fbclid=IwZXh0bgNhZW0CMTEAAR3WEhPMvzJhAjxX7eeva-pQReK8zQtncIzwZbh5gTTJCj3KXel5s-G8w1A_aem_NAjyAU18jwqKcNRbIx4U5w)
+
+*Photo by Scott Walsh on Unsplash*
 
 # 🐾 Setup 🐾
+
 ## Loading packages
+
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 library(skimr)
@@ -29,8 +37,11 @@ library(lmtest)
 library(ggcorrplot)
 library(lm.beta)
 library(ggfortify)
+library(lubridate)
 ```
+
 ## Reading the dataset
+
 ```{r}
 animal_rescues <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
 ```
