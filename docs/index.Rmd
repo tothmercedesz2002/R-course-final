@@ -9,65 +9,27 @@ editor_options:
 
 The dataset includes data about the London Fire Brigade's **animal rescues** since **January 2009**. As provided in the official dataset description, in **2020**, there was a **20% increase** in rescues compared to 2019. The biggest increase was observed among **non-domestic animals**.
 
+Codebook available [here.](https://github.com/rfordatascience/tidytuesday/blob/main/data/2021/2021-06-29/readme.md)
+
 # 🐾 Goals of this analysis 🐾
 
 In this analysis, I will:  
-- confirm the rise in rescues in 2020;  
-- compare the rise in domestic and non-domestic animal rescues in 2020;  
+- confirm the rise in rescues by plotting;  
+- compare the number of domestic and non-domestic animal rescues in 2020 by plotting and t-test;  
 - investigate whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model;  
 - investigate what other factors influence rescue cost with a more complex linear regression model;  
-- compare the simple and the more complex models' performance.  
-
-![](https://images.unsplash.com/photo-1500479694472-551d1fb6258d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
-
-*Photo by Scott Walsh on Unsplash*
-
-# 🐾 Setup 🐾
-
-## Loading packages
-
-```{r message = FALSE, warning = FALSE}
-library(tidyverse)
-library(skimr)
-library(correlation)
-library(performance)
-library(broom)
-library(car)
-library(lmtest)
-library(ggcorrplot)
-library(lm.beta)
-library(ggfortify)
-library(lubridate)
-```
-
-## Reading the dataset
-
-```{r}
-animal_rescues <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
-```
----
-title: "Analysis of Animal Rescues (tidytuesday)"
-author: "Tóth Mercédesz"
-output: html_document
-editor_options: 
-  chunk_output_type: console
----
-# 🐾 About the dataset 🐾
-
-The dataset includes data about the London Fire Brigade's **animal rescues** since **January 2009**. As provided in the official dataset description, in **2020**, there was a **20% increase** in rescues compared to 2019. The biggest increase was observed among **non-domestic animals**.
-
-# 🐾 Goals of this analysis 🐾
-
-In this analysis, I will:
-- confirm the rise in rescues in 2020;
-- compare the rise in domestic and non-domestic animal rescues in 2020;
-- investigate whether non-domestic animals' rescue costs more money  than domestic animals' rescue by fitting linear regression model;
-- investigate what other factors influence rescue cost with a more complex linear regression model;
 - compare the simple and the more complex models' performance.
 
-![](https://unsplash.com/photos/brown-animal-on-green-grass-CQl3Y5bV6FA?fbclid=IwZXh0bgNhZW0CMTEAAR3WEhPMvzJhAjxX7eeva-pQReK8zQtncIzwZbh5gTTJCj3KXel5s-G8w1A_aem_NAjyAU18jwqKcNRbIx4U5w)
+In both models, the **outcome** variable will be incident_notional_cost.
 
-*Photo by Scott Walsh on Unsplash*
+In the more complex model, I will include the following **predictors**:  
+- day_or_night: computed from date_time_of_call (0: day, 1: night);  
+- pump_count: number of trucks needed for the rescue;    
+- pump_hours_total: length of rescue operation;  
+- domestic_wild: computed from animal_group_parent (0: domestic; 1: wild);  
+- borough_inner_outer: computed from borough based on [Wikipedia](https://en.wikipedia.org/wiki/London_boroughs) (0: inner; 1: outer).
+
+![*Photo by Scott Walsh on Unsplash*](https://images.unsplash.com/photo-1500479694472-551d1fb6258d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
 
 # 🐾 Setup 🐾
 
@@ -93,31 +55,63 @@ library(lubridate)
 animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
 ```
 
-# 🐾 Exploratory data analysis 🐾
-
-## Exploring the dataset
+## Preparing the dataset
 
 ```{r}
 # Checking structure and variables' type
+
 str(animal_rescues_raw)
 
 # Selecting variables of interest
-animal_rescues_interest <- 
-  animal_rescues_raw %>%
-  select(date_time_of_call, cal_year, pump_count, pump_hours_total, incident_notional_cost, animal_group_parent, property_category, borough)
+
+animal_rescues_interest <- animal_rescues_raw %>%
+  select(date_time_of_call, cal_year, pump_count, pump_hours_total, incident_notional_cost, animal_group_parent, borough)
+
+# Looking for missing data
+
+sum(is.na(animal_rescues_interest))
+which(rowSums(is.na(animal_rescues_interest)) > 0)
+missing_info <- animal_rescues_interest[c(4138, 4165, 4246, 4709, 5897, 6339, 6768, 7072, 7478), ]
+print(missing_info)
+
+unique(animal_rescues_interest$pump_count)
+unique(animal_rescues_interest$pump_hours_total)
+unique(animal_rescues_interest$incident_notional_cost)
+unique(animal_rescues_interest$animal_group_parent)
+
+# Filtering rows with missing values and "NULL" values
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  filter(!is.na(borough)) %>%
+  filter(pump_count != "NULL") %>%
+  filter(pump_hours_total != "NULL") %>%
+  filter(incident_notional_cost != "NULL")
 
 # Converting variables
-animal_rescues_interest <- mutate(
-  date_time_of_call = date_time_of_call(date_time_of_call),
-  pump_count = as.numeric(pump_count),
-  pump_hours_total = as.numeric(pump_hours_total),
-  incident_notional_cost = as.numeric(incident_notional_cost)
-  animal_group_parent = as.factor(animal_group_parent),
-  property_category = as.factor(property_category),
-  borough = as.factor(borough)
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  mutate(
+    date_time_of_call = dmy_hm(date_time_of_call),
+    pump_count = as.numeric(pump_count),
+    pump_hours_total = as.numeric(pump_hours_total),
+    incident_notional_cost = as.numeric(incident_notional_cost),
+    animal_group_parent = as.factor(animal_group_parent),
+    borough = as.factor(borough)
+    )
+
+str(animal_rescues_interest)
+summary(animal_rescues_interest)
+
+# Computing day_or_night variable
+# 0 - day: 06:00 - 18:00
+# 1 - night: 18:01 - 05:59
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  mutate(
+    day_or_night = case_when(
+      hour(date_time_of_call) >= 6 & hour(date_time_of_call) < 18 ~ 0,
+      TRUE ~ 1)
   )
-
-
 
 
 
