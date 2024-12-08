@@ -13,9 +13,11 @@ Codebook available [here.](https://github.com/rfordatascience/tidytuesday/blob/m
 
 # 🐾 Goals of this analysis 🐾
 
-In this analysis, I will:  
+In this analysis, I will:
+- prepare the dataset, compute variables and visualize them;  
 - confirm the rise in rescues by plotting;  
 - compare the number of domestic and non-domestic animal rescues in 2020 by plotting and t-test;  
+- look for correlations between variables of interest;  
 - investigate whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model;  
 - investigate what other factors influence rescue cost with a more complex linear regression model;  
 - compare the simple and the more complex models' performance.
@@ -57,7 +59,7 @@ library(lubridate)
 animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
 ```
 
-## Preparing the dataset
+# Preparing the dataset, computing variables and visualizing them
 
 ```{r}
 # Checking structure and variables' type
