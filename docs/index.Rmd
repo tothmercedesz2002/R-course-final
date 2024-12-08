@@ -186,3 +186,62 @@ ggplot(animal_rescues_interest, aes(domestic_wild_forplots, fill = domestic_wild
   theme_minimal() +
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
 ```
+
+```{r}
+# Computing borough_inner_outer
+# 0: inner
+# 1: outer
+
+levels(animal_rescues_interest$borough)
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  mutate(borough = str_to_title(as.character(borough))) %>%
+  mutate(borough = factor(borough))
+
+levels(animal_rescues_interest$borough)
+
+valid_boroughs <- c(
+  "Barking and Dagenham", "Barnet", "Bexley", "Brent", "Bromley", "Camden", "Croydon", "Ealing",
+  "Enfield", "Greenwich", "Hackney", "Hammersmith And Fulham", "Haringey", "Harrow", "Havering", 
+  "Hillingdon", "Hounslow", "Islington", "Kensington And Chelsea", "Kingston upon Thames", 
+  "Lambeth", "Lewisham", "Merton", "Newham", "Redbridge", "Richmond Upon Thames", "Southwark", 
+  "Sutton", "Tower Hamlets", "Waltham Forest", "Wandsworth", "Westminster"
+)
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  filter(borough %in% valid_boroughs)
+animal_rescues_interest$borough <- droplevels(animal_rescues_interest$borough)
+
+levels(animal_rescues_interest$borough)
+nlevels(animal_rescues_interest$borough)
+
+# inner boroughs: "Camden", "Greenwich", "Hackney", "Hammersmith And Fulham", "Islington", "Kensington And Chelsea", "Lambeth", "Lewisham", "Southwark", "Tower Hamlets", "Wandsworth", "Westminster"
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  mutate(borough_inner_outer = ifelse(borough %in% c(
+    "Camden", "Greenwich", "Hackney", "Hammersmith And Fulham", "Islington", "Kensington And Chelsea", "Lambeth",
+    "Lewisham", "Southwark", "Tower Hamlets", "Wandsworth", "Westminster"
+    ), 0, 1))
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  mutate(borough_inner_outer = as.factor(borough_inner_outer))
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  mutate(
+    borough_inner_outer_forplots = factor(
+      borough_inner_outer,
+      levels = c(0, 1),
+      labels = c("Inner", "Outer"))
+  )
+
+ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, fill = borough_inner_outer_forplots)) +
+  geom_bar() +
+  labs(
+    x = "Type of borough",
+    y = "Number of rescues",
+    title = "Animal rescues in London boroughs"
+  ) +
+  scale_fill_manual(values = c("Inner" = "#50c878", "Outer" = "#db7093")) +
+  theme_minimal() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+```
