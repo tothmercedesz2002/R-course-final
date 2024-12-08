@@ -61,6 +61,8 @@ animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascienc
 
 # Preparing the dataset, computing variables and visualizing them
 
+## First look at the dataset, filtering data and converting variables
+
 ```{r}
 # Checking structure and variables' type
 
@@ -107,8 +109,10 @@ str(animal_rescues_interest)
 summary(animal_rescues_interest)
 ```
 
+## Computing day_or_night variable and visualization
+
 ```{r}
-# Computing day_or_night variable and checking counts
+# Computing day_or_night variable
 # 0 - day: 06:00 - 18:00
 # 1 - night: 18:01 - 05:59
 
@@ -119,6 +123,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
       TRUE ~ 1)
   )
 
+# Creating an extra variable for plotting
+
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     day_or_night_forplots = factor(
@@ -126,6 +132,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
       levels = c(0, 1),
       labels = c("Day", "Night"))
   )
+
+# Checking and comparing counts of day and night animal rescues
 
 ggplot(animal_rescues_interest, aes(day_or_night_forplots, fill = day_or_night_forplots)) +
   geom_bar() +
@@ -139,8 +147,10 @@ ggplot(animal_rescues_interest, aes(day_or_night_forplots, fill = day_or_night_f
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
 ```
 
+## Computing domestic_wild variable and visualization
+
 ```{r}
-# Computing domestic_wild variable and checking counts
+# Computing domestic_wild variable
 # 0: domestic (traditional pets and livestock)
 # 1: wild (including exotic animals kept as pets)
 
@@ -169,6 +179,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(domestic_wild = as.factor(domestic_wild))
 
+# Creating an extra variable for plotting
+
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     domestic_wild_forplots = factor(
@@ -176,6 +188,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
       levels = c(0, 1),
       labels = c("Domestic", "Wild"))
   )
+
+# Checking and comparing counts of domestic and wild rescued animals
 
 ggplot(animal_rescues_interest, aes(domestic_wild_forplots, fill = domestic_wild_forplots)) +
   geom_bar() +
@@ -188,6 +202,8 @@ ggplot(animal_rescues_interest, aes(domestic_wild_forplots, fill = domestic_wild
   theme_minimal() +
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
 ```
+
+## Computing borough_inner_outer and visualization
 
 ```{r}
 # Computing borough_inner_outer
@@ -228,6 +244,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(borough_inner_outer = as.factor(borough_inner_outer))
 
+# Creating an extra variable for plotting
+
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     borough_inner_outer_forplots = factor(
@@ -235,6 +253,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
       levels = c(0, 1),
       labels = c("Inner", "Outer"))
   )
+
+# Checking and comparing counts of animal rescues in inner and outer boroughs of London
 
 ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, fill = borough_inner_outer_forplots)) +
   geom_bar() +
