@@ -420,4 +420,25 @@ print(rescues_change_comparison)
 
 # 🐾 Looking for correlations between variables of interest 🐾
 
+```{r}
+correlations <- animal_rescues_interest %>%
+  select(incident_notional_cost, cal_year, pump_count, pump_hours_total, day_or_night, domestic_wild, borough_inner_outer) %>%
+  mutate(
+    day_or_night = as.numeric(day_or_night),
+    domestic_wild = as.numeric(domestic_wild),
+    borough_inner_outer = as.numeric(borough_inner_outer)) %>%
+  correlation() %>%
+  print()
+
+ggcorrplot(correlations)
+
+# The main focus is incident_notional_cost, the price of rescues.
+# Weak positive correlation with cal_year: rescues became more expensive over time
+# Strong positive correlation with pump_count: if more pumps are necessary, the rescue becomes more expensive
+# Strong positive correlation with pump_hours_total: longer rescues are more expensive
+# Weak negative correlation with day_or_night: night rescues are a bit cheaper (maybe due to less traffic?)
+# No significant correlation with domestic_wild (but domestic animals are little bit more expensive)
+# Weak positive correlation with borough_inner_outer: rescues in outer boroughs are slightly more expensive
+```
+
 
