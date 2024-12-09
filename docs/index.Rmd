@@ -477,4 +477,145 @@ nullmodel_standardized <- lm.beta(nullmodel)
 coef(nullmodel_standardized)
 ```
 
+```{r}
+# Extracting specific model test statistics
+adjusted_r2_nullmodel <- glance(nullmodel) %>% pull(adj.r.squared)
+f_statistic_nullmodel <- glance(nullmodel) %>% pull(statistic)
+p_value_nullmodel <- glance(nullmodel) %>% pull(p.value)
+df_nullmodel <- glance(nullmodel) %>% pull(df)
+AIC_nullmodel <- glance(nullmodel) %>% pull(AIC)
 
+model_stats_nullmodel <- tibble(
+  Statistic = c("Adjusted R-squared", "F-statistic", "p-value", "Degrees of Freedom", "AIC"),
+  Value = c(adjusted_r2_nullmodel, f_statistic_nullmodel, p_value_nullmodel, df_nullmodel, AIC_nullmodel))
+
+print(model_stats_nullmodel)
+
+# Extracting coefficients
+standardized_coefficients_nullmodel <- (coef(nullmodel_standardized))[-1]
+  
+coeff_extracted_nullmodel <- tidy(nullmodel, conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(standardized = c(NA, standardized_coefficients_nullmodel))
+
+print(coeff_extracted_nullmodel)
+```
+
+```{r}
+# Cook's distance for nulllmodel and checking for influential outliers (Cook's distance > 1)
+cooks_distance_nullmodel <- cooks.distance(nullmodel)
+influential_outliers_nullmodel <- which(cooks_distance_nullmodel > 1)
+influential_outliers_nullmodel
+
+# Q-Q plot for normality check
+autoplot(nullmodel, which = 2)
+
+## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+leverage_values <- hatvalues(nullmodel)
+leverage_values[c(3541, 2399, 420)]
+
+## Viewing observations that might be influential
+animal_rescues_interest[3541, ]
+animal_rescues_interest[2399, ]
+animal_rescues_interest[4201, ]
+### Horses and a cat with high rescue costs.
+
+# Residuals vs Fitted plot to check linearity and homoskedasticity
+autoplot(nullmodel, which = 1)
+```
+
+## Null model with log transformed outcome variable
+```{r}
+# Due to assumption violations, I will try log transformation
+
+animal_rescues_interest <- animal_rescues_interest %>%
+  mutate(log_incident_notional_cost = log(incident_notional_cost + 1))
+
+nullmodel_log <- lm(log_incident_notional_cost ~ domestic_wild, data = animal_rescues_interest)
+
+# Model statistics
+glance(nullmodel_log)
+
+#Coefficients
+summary(nullmodel_log)
+tidy(nullmodel_log, conf.int = TRUE)
+
+# Computing standardized beta coefficients
+nullmodel_log_standardized <- lm.beta(nullmodel_log)
+coef(nullmodel_log_standardized)
+```
+
+```{r}
+# Extracting specific model test statistics
+adjusted_r2_nullmodel_log <- glance(nullmodel_log) %>% pull(adj.r.squared)
+f_statistic_nullmodel_log <- glance(nullmodel_log) %>% pull(statistic)
+p_value_nullmodel_log <- glance(nullmodel_log) %>% pull(p.value)
+df_nullmodel_log <- glance(nullmodel_log) %>% pull(df)
+AIC_nullmodel_log <- glance(nullmodel_log) %>% pull(AIC)
+
+model_stats_nullmodel_log <- tibble(
+  Statistic = c("Adjusted R-squared", "F-statistic", "p-value", "Degrees of Freedom", "AIC"),
+  Value = c(adjusted_r2_nullmodel_log, f_statistic_nullmodel_log, p_value_nullmodel_log, df_nullmodel_log, AIC_nullmodel_log))
+
+print(model_stats_nullmodel_log)
+
+# Extracting coefficients
+standardized_coefficients_nullmodel_log <- (coef(nullmodel_log_standardized))[-1]
+  
+coeff_extracted_nullmodel_log <- tidy(nullmodel_log, conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(standardized = c(NA, standardized_coefficients_nullmodel_log))
+
+print(coeff_extracted_nullmodel_log)
+```
+
+```{r}
+# Extracting specific model test statistics
+adjusted_r2_nullmodel <- glance(nullmodel) %>% pull(adj.r.squared)
+f_statistic_nullmodel <- glance(nullmodel) %>% pull(statistic)
+p_value_nullmodel <- glance(nullmodel) %>% pull(p.value)
+df_nullmodel <- glance(nullmodel) %>% pull(df)
+AIC_nullmodel <- glance(nullmodel) %>% pull(AIC)
+
+model_stats_nullmodel <- tibble(
+  Statistic = c("Adjusted R-squared", "F-statistic", "p-value", "Degrees of Freedom", "AIC"),
+  Value = c(adjusted_r2_nullmodel, f_statistic_nullmodel, p_value_nullmodel, df_nullmodel, AIC_nullmodel))
+
+print(model_stats_nullmodel)
+
+# Extracting coefficients
+standardized_coefficients_nullmodel <- (coef(nullmodel_standardized))[-1]
+  
+coeff_extracted_nullmodel <- tidy(nullmodel, conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(standardized = c(NA, standardized_coefficients_nullmodel))
+
+print(coeff_extracted_nullmodel)
+```
+
+```{r}
+# Cook's distance for nulllmodel_log and checking for influential outliers (Cook's distance > 1)
+cooks_distance_nullmodel_log <- cooks.distance(nullmodel_log)
+influential_outliers_nullmodel_log <- which(cooks_distance_nullmodel_log > 1)
+influential_outliers_nullmodel_log
+
+# Q-Q plot for normality check
+autoplot(nullmodel_log, which = 2)
+
+## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+leverage_values <- hatvalues(nullmodel_log)
+leverage_values[c(5518, 2399, 420)]
+
+## Viewing observations that might be influential
+animal_rescues_interest[5518, ]
+animal_rescues_interest[2399, ]
+animal_rescues_interest[4201, ]
+### Horses and a dog with no rescue cost.
+
+# Residuals vs Fitted plot to check linearity and homoskedasticity
+autoplot(nullmodel_log, which = 1)
+
+# The model didn't get much better when it comes to assumptions, so I will stick to no log-transformation for easier interpretation. I don't want to get rid of the high rescue costs because they are my main interest.
+```
+
+# 🐾 Building complex model - investigate what other factors influence rescue cost with a more complex linear regression model🐾
