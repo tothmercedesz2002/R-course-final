@@ -403,7 +403,8 @@ ggplot(rescues_per_year, aes(
 
 # Calculating increase
 
-rescues_change_comparison <- rescues_per_year_change %>%
+rescues_change_comparison <- rescues_per_year %>%
+  filter(cal_year %in% c(2019, 2020)) %>%
   group_by(domestic_wild_forplots) %>%
   spread(key = cal_year, value = rescue_count) %>%
   mutate(increase = `2020` - `2019`) 
