@@ -512,7 +512,7 @@ autoplot(nullmodel, which = 2)
 
 ## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(nullmodel)
-leverage_values[c(3541, 2399, 420)]
+leverage_values[c(3541, 2399, 4201)]
 
 ## Viewing observations that might be influential
 animal_rescues_interest[3541, ]
@@ -619,3 +619,149 @@ autoplot(nullmodel_log, which = 1)
 ```
 
 # 🐾 Building complex model - investigate what other factors influence rescue cost with a more complex linear regression model🐾
+
+In the more complex model, I will include the following **predictors**:  
+- day_or_night: computed from date_time_of_call (0: day, 1: night);  
+- pump_count: number of trucks needed for the rescue;    
+- pump_hours_total: length of rescue operation;  
+- domestic_wild: computed from animal_group_parent (0: domestic; 1: wild);  
+- borough_inner_outer: computed from borough (0: inner; 1: outer).
+
+```{r}
+complexmodel <- lm(incident_notional_cost ~ day_or_night + pump_count + pump_hours_total + domestic_wild + borough_inner_outer, data = animal_rescues_interest)
+
+# Model statistics
+glance(complexmodel)
+
+#Coefficients
+summary(complexmodel)
+tidy(complexmodel, conf.int = TRUE)
+
+# Computing standardized beta coefficients
+complexmodel_standardized <- lm.beta(complexmodel)
+coef(complexmodel_standardized)
+```
+
+```{r}
+# Extracting specific model test statistics
+adjusted_r2_complexmodel <- glance(complexmodel) %>% pull(adj.r.squared)
+f_statistic_complexmodel <- glance(complexmodel) %>% pull(statistic)
+p_value_complexmodel <- glance(complexmodel) %>% pull(p.value)
+df_complexmodel <- glance(complexmodel) %>% pull(df)
+AIC_complexmodel <- glance(complexmodel) %>% pull(AIC)
+
+model_stats_complexmodel <- tibble(
+  Statistic = c("Adjusted R-squared", "F-statistic", "p-value", "Degrees of Freedom", "AIC"),
+  Value = c(adjusted_r2_complexmodel, f_statistic_complexmodel, p_value_complexmodel, df_complexmodel, AIC_complexmodel))
+
+print(model_stats_complexmodel)
+
+# Extracting coefficients
+standardized_coefficients_complexmodel <- (coef(complexmodel_standardized))[-1]
+  
+coeff_extracted_complexmodel <- tidy(complexmodel, conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(standardized = c(NA, standardized_coefficients_complexmodel))
+
+print(coeff_extracted_complexmodel)
+```
+
+```{r}
+# Cook's distance for nulllmodel and checking for influential outliers (Cook's distance > 1)
+cooks_distance_complexmodel <- cooks.distance(complexmodel)
+influential_outliers_complexmodel <- which(cooks_distance_complexmodel > 1)
+influential_outliers_complexmodel
+
+# Q-Q plot for normality check
+autoplot(complexmodel, which = 2)
+
+## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+leverage_values <- hatvalues(complexmodel)
+leverage_values[c(1391, 6751, 4201)]
+
+## Viewing observations that might be influential
+animal_rescues_interest[1391, ]
+animal_rescues_interest[6751, ]
+animal_rescues_interest[4201, ]
+### A horse, a deer and a cat with high rescue costs.
+
+# Residuals vs Fitted plot to check linearity and homoskedasticity
+autoplot(complexmodel, which = 1)
+
+# Calculating VIF values for complex model
+vif(complexmodel)
+# vif < 5, so these are okay
+
+# The assumption checks still don't look nice, so I will try the log-transformation again with the complex model too.
+```
+
+## Lets try log transforming again
+
+```{r}
+complexmodel_log <- lm(log_incident_notional_cost ~ day_or_night + pump_count + pump_hours_total + domestic_wild + borough_inner_outer, data = animal_rescues_interest)
+
+# Model statistics
+glance(complexmodel_log)
+
+#Coefficients
+summary(complexmodel_log)
+tidy(complexmodel_log, conf.int = TRUE)
+
+# Computing standardized beta coefficients
+complexmodel_log_standardized <- lm.beta(complexmodel_log)
+coef(complexmodel_log_standardized)
+```
+
+```{r}
+# Extracting specific model test statistics
+adjusted_r2_complexmodel_log <- glance(complexmodel_log) %>% pull(adj.r.squared)
+f_statistic_complexmodel_log <- glance(complexmodel_log) %>% pull(statistic)
+p_value_complexmodel_log <- glance(complexmodel) %>% pull(p.value)
+df_complexmodel_log <- glance(complexmodel_log) %>% pull(df)
+AIC_complexmodel_log <- glance(complexmodel_log) %>% pull(AIC)
+
+model_stats_complexmodel_log <- tibble(
+  Statistic = c("Adjusted R-squared", "F-statistic", "p-value", "Degrees of Freedom", "AIC"),
+  Value = c(adjusted_r2_complexmodel_log, f_statistic_complexmodel_log, p_value_complexmodel_log, df_complexmodel_log, AIC_complexmodel_log))
+
+print(model_stats_complexmodel_log)
+
+# Extracting coefficients
+standardized_coefficients_complexmodel_log <- (coef(complexmodel_log_standardized))[-1]
+  
+coeff_extracted_complexmodel_log <- tidy(complexmodel_log, conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  mutate(standardized = c(NA, standardized_coefficients_complexmodel_log))
+
+print(coeff_extracted_complexmodel_log)
+```
+
+```{r}
+# Cook's distance for nulllmodel and checking for influential outliers (Cook's distance > 1)
+cooks_distance_complexmodel_log <- cooks.distance(complexmodel_log)
+influential_outliers_complexmodel_log <- which(cooks_distance_complexmodel_log > 1)
+influential_outliers_complexmodel_log
+# We have already seen these animals before, they had high rescue costs.
+
+# Q-Q plot for normality check
+autoplot(complexmodel_log, which = 2)
+
+## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+leverage_values <- hatvalues(complexmodel_log)
+leverage_values[c(5518, 2399, 4201)]
+
+## Viewing observations that might be influential
+animal_rescues_interest[5518, ]
+animal_rescues_interest[2399, ]
+animal_rescues_interest[4201, ]
+### High rescue costs or no cost.
+
+# Residuals vs Fitted plot to check linearity and homoskedasticity
+autoplot(complexmodel_log, which = 1)
+
+# Calculating VIF values for complex model
+vif(complexmodel_log)
+# vif < 5, so these are okay
+
+# Still not perfect (maybe somewhat nicer plots). I will stick to the original models in the comparison for easier interpretation.
+```
