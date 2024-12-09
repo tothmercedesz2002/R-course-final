@@ -59,7 +59,7 @@ library(lubridate)
 animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
 ```
 
-# Preparing the dataset, computing variables and visualizing them
+# 🐾 Preparing the dataset, computing variables and visualizing them 🐾
 
 ## First look at the dataset, filtering data and converting variables
 
@@ -267,3 +267,97 @@ ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, fill = borough
   theme_minimal() +
   theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
 ```
+
+## Exploring distribution of remaining variables of interest
+```{r}
+# pump_count
+
+mean(animal_rescues_interest$pump_count)
+sd(animal_rescues_interest$pump_count)
+min(animal_rescues_interest$pump_count)
+max(animal_rescues_interest$pump_count)
+
+ggplot(animal_rescues_interest, aes(pump_count)) +
+  geom_histogram(binwidth = 1, fill = "#e6e6fa", color = "black") +
+  labs(
+    x = "Number of pumps",
+    y = "Count",
+    title = "Distribution of pump count"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Due to pump_count = 1 overwhelming the plot, here is another plot with pump_count > 1
+
+ggplot(animal_rescues_interest %>% filter(pump_count > 1), aes(pump_count)) +
+  geom_histogram(binwidth = 1, fill = "#e6e6fa", color = "black") +
+  labs(
+    x = "Number of pumps",
+    y = "Count",
+    title = "Distribution of pump count (> 1)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# pump_hours_total
+
+mean(animal_rescues_interest$pump_hours_total)
+sd(animal_rescues_interest$pump_hours_total)
+min(animal_rescues_interest$pump_hours_total)
+max(animal_rescues_interest$pump_hours_total)
+
+ggplot(animal_rescues_interest, aes(pump_hours_total)) +
+  geom_histogram(binwidth = 1, fill = "#b0e0e6", color = "black") +
+  labs(
+    x = "Hours",
+    y = "Count",
+    title = "Distribution of rescue length"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Due to low values overwhelming the plot, here is another plot with pump_hours_total > 3
+
+ggplot(animal_rescues_interest %>% filter(pump_hours_total > 3), aes(pump_hours_total)) +
+  geom_histogram(binwidth = 1, fill = "#b0e0e6", color = "black") +
+  labs(
+    x = "Hours",
+    y = "Count",
+    title = "Distribution of rescue length (> 3)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# incident_notional_cost
+
+mean(animal_rescues_interest$incident_notional_cost)
+sd(animal_rescues_interest$incident_notional_cost)
+min(animal_rescues_interest$incident_notional_cost)
+max(animal_rescues_interest$incident_notional_cost)
+
+ggplot(animal_rescues_interest, aes(incident_notional_cost)) +
+  geom_histogram(binwidth = 100, fill = "#8fbc8f", color = "black") +
+  labs(
+    x = "Notional cost of rescues",
+    y = "Count",
+    title = "Distribution of notional cost of rescues"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Due to low values overwhelming the plot, here is another plot with incident_notional_cost > 1000
+
+ggplot(animal_rescues_interest %>% filter(incident_notional_cost > 1000), aes(incident_notional_cost)) +
+  geom_histogram(binwidth = 100, fill = "#8fbc8f", color = "black") +
+  labs(
+    x = "Notional cost of rescues",
+    y = "Count",
+    title = "Distribution of notional cost of rescues (> 1000)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Since the cost of the rescue is the main focus of my analysis (I want to know what causes the extreme values), I will leave the variable as it is (no transformations).
+```
+
+# 🐾 Confirming the rise in rescues by plotting 🐾
