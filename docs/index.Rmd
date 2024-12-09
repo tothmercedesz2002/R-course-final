@@ -502,7 +502,7 @@ print(coeff_extracted_nullmodel)
 ```
 
 ```{r}
-# Cook's distance for nulllmodel and checking for influential outliers (Cook's distance > 1)
+# Cook's distance for nullmodel and checking for influential outliers (Cook's distance > 1)
 cooks_distance_nullmodel <- cooks.distance(nullmodel)
 influential_outliers_nullmodel <- which(cooks_distance_nullmodel > 1)
 influential_outliers_nullmodel
@@ -763,5 +763,81 @@ autoplot(complexmodel_log, which = 1)
 vif(complexmodel_log)
 # vif < 5, so these are okay
 
-# Still not perfect (maybe somewhat nicer plots). I will stick to the original models in the comparison for easier interpretation.
+# Still not perfect (maybe somewhat nicer plots). I will compare both the original, both the log transformed models' performance.
+```
+
+🐾 Compare the simple and the more complex models' performance 🐾
+```{r}
+# These are the original models.
+
+# Nullmodel stats
+model_stats_nullmodel
+
+# COmplex model stats
+model_stats_complexmodel
+
+# Comparing AIC values: the complex model has lower AIC (better)
+AIC_nullmodel
+AIC_complexmodel
+
+# Comparing F values of the models: the complex model has higher F statistic (better)
+f_statistic_nullmodel
+f_statistic_complexmodel
+
+# Comparing p values of the models: the complex model has lower p value (better)
+p_value_nullmodel
+p_value_complexmodel
+
+# Coefficients
+coeff_extracted_nullmodel
+coeff_extracted_complexmodel
+
+# In the null model, the animal type was not a significant predictor of rescue cost.
+# In the more complex model:
+## day_or_night: significant predicor (night rescues more expensive)
+## pump_count: significant preditor (more pumps - less expensive)
+## pump_hours_total: significant predictor (longer rescue - more expensive)
+## domestic_wild: significant predictor (wild animals - more expensive)
+## borough_inner_outer: not significant (outer borough - cheaper)
+
+# Compared to the correlations, controlling for other factors as well, the picture became more detailed. For example, in the regression model, more pumps lead to smaller costs. That might be because the model also controls for the length of the rescue, which might be decreased if more pumps are working. Also, at night, maybe less pumps are available. In the regression, wild animal rescues and outer borough rescues were also associated with higher costs (the correlations were either weak or not significant in these cases).
+```
+
+```{r}
+# These are the log transformed models
+
+# Nullmodel stats
+model_stats_nullmodel_log
+
+# COmplex model stats
+model_stats_complexmodel_log
+
+# Comparing AIC values: the complex model has lower AIC (better)
+# Both are better than the original models without log-transformation.
+AIC_nullmodel_log
+AIC_complexmodel_log
+
+# Comparing F values of the models: the complex model has higher F statistic (better)
+# The original complex model has higher F value
+f_statistic_nullmodel_log
+f_statistic_complexmodel_log
+
+# Comparing p values of the models: the complex model has lower p value (better)
+# Log-transformed nullmodel has lower p value than original, the complex models are both p = 0
+p_value_nullmodel_log
+p_value_complexmodel_log
+
+# Coefficients
+coeff_extracted_nullmodel_log
+coeff_extracted_complexmodel_log
+
+# In the null model, the animal type was not a significant predictor of rescue cost.
+# In the more complex model:
+## day_or_night: not significant
+## pump_count: significant preditor (more pumps - less expensive)
+## pump_hours_total: significant predictor (longer rescue - more expensive)
+## domestic_wild: significant predictor (wild animals - more expensive)
+## borough_inner_outer: not significant
+
+# The coefficients' results are similar to the the results of the original models.
 ```
