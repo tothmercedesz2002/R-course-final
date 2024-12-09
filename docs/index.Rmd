@@ -1,7 +1,10 @@
 ---
 title: "Analysis of Animal Rescues (tidytuesday)"
 author: "Tóth Mercédesz"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 1
 editor_options: 
   chunk_output_type: console
 ---
@@ -413,4 +416,7 @@ print(rescues_change_comparison)
 
 # Conclusion: Indeed, in 2020 there was an increase in animal rescues, especially in wild animal rescues.
 ```
+
+# 🐾 Looking for correlations between variables of interest 🐾
+
 
