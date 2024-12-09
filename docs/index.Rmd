@@ -15,8 +15,7 @@ Codebook available [here.](https://github.com/rfordatascience/tidytuesday/blob/m
 
 In this analysis, I will:
 - prepare the dataset, compute variables and visualize them;  
-- confirm the rise in rescues by plotting;  
-- compare the number of domestic and non-domestic animal rescues in 2020 by plotting and t-test;  
+- confirm the rise in rescues by plotting (also comparing domestic and wild animals);  
 - look for correlations between variables of interest;  
 - investigate whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model;  
 - investigate what other factors influence rescue cost with a more complex linear regression model;  
@@ -363,15 +362,15 @@ ggplot(animal_rescues_interest %>% filter(incident_notional_cost > 1000), aes(in
 # 🐾 Confirming the rise in rescues by plotting 🐾
 
 ```{r}
-# According to the dataset description, there was an increase in rescues in 2020. In this section, I will confirm this trend via plotting.
+# According to the dataset description, there was an increase in rescues in 2020, especially when it comes to wild animals. In this section, I will confirm this trend via plotting.
 
 # Grouping by year and calculating the count of rescues per year
 
 rescues_per_year <- animal_rescues_interest %>%
-  group_by(cal_year) %>%
+  group_by(cal_year, domestic_wild_forplots) %>%
   summarise(rescue_count = n())
 
-# Plotting
+# Plotting (both for domestic and wild animals)
 
 ggplot(rescues_per_year, aes(x = cal_year, y = rescue_count)) +
   geom_line(color = "#ff69b4", size = 1) +
@@ -384,6 +383,33 @@ ggplot(rescues_per_year, aes(x = cal_year, y = rescue_count)) +
   ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
+
+# Plotting (separate lines for domestic and wild animals)
+
+ggplot(rescues_per_year, aes(
+  x = cal_year, y = rescue_count, color = domestic_wild_forplots, group = domestic_wild_forplots)) +
+  geom_line(size = 1) +
+  geom_point() +
+  scale_x_continuous(breaks = 2009:2021) +
+  scale_color_manual(values = c("Domestic" = "pink", "Wild" = "purple")) +
+  labs(
+    x = "Year",
+    y = "Number of Rescues",
+    title = "Number of domestic and wild animal rescues per year",
+    color = "Animal Type"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Calculating increase
+
+rescues_change_comparison <- rescues_per_year_change %>%
+  group_by(domestic_wild_forplots) %>%
+  spread(key = cal_year, value = rescue_count) %>%
+  mutate(increase = `2020` - `2019`) 
+
+print(rescues_change_comparison)
+
+# Conclusion: Indeed, in 2020 there was an increase in animal rescues, especially in wild animal rescues.
 ```
 
-# 🐾 Comparing the number of domestic and non-domestic animal rescues in 2020 by plotting and t-test 🐾
