@@ -361,3 +361,29 @@ ggplot(animal_rescues_interest %>% filter(incident_notional_cost > 1000), aes(in
 ```
 
 # 🐾 Confirming the rise in rescues by plotting 🐾
+
+```{r}
+# According to the dataset description, there was an increase in rescues in 2020. In this section, I will confirm this trend via plotting.
+
+# Grouping by year and calculating the count of rescues per year
+
+rescues_per_year <- animal_rescues_interest %>%
+  group_by(cal_year) %>%
+  summarise(rescue_count = n())
+
+# Plotting
+
+ggplot(rescues_per_year, aes(x = cal_year, y = rescue_count)) +
+  geom_line(color = "#ff69b4", size = 1) +
+  geom_point() +
+  scale_x_continuous(breaks = 2009:2021) +
+  labs(
+    x = "Year",
+    y = "Number of rescues",
+    title = "Number of rescues per year"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+# 🐾 Comparing the number of domestic and non-domestic animal rescues in 2020 by plotting and t-test 🐾
