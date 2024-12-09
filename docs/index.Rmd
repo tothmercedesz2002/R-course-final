@@ -5,6 +5,7 @@ output:
   html_document:
     toc: true
     toc_depth: 1
+    toc_float: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -16,7 +17,7 @@ Codebook available [here.](https://github.com/rfordatascience/tidytuesday/blob/m
 
 # 🐾 Goals of this analysis 🐾
 
-In this analysis, I will:
+In this analysis, I will:  
 - prepare the dataset, compute variables and visualize them;  
 - confirm the rise in rescues by plotting (also comparing domestic and wild animals);  
 - look for correlations between variables of interest;  
