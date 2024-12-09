@@ -441,4 +441,40 @@ ggcorrplot(correlations)
 # Weak positive correlation with borough_inner_outer: rescues in outer boroughs are slightly more expensive
 ```
 
+## Checking for linear relationships
+
+```{r}
+ggplot(animal_rescues_interest, aes(cal_year, incident_notional_cost)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+
+ggplot(animal_rescues_interest, aes(pump_count, incident_notional_cost)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+
+ggplot(animal_rescues_interest, aes(pump_hours_total, incident_notional_cost)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+```
+
+# 🐾 Building null model - investigating whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model🐾
+
+```{r}
+nullmodel <- lm(incident_notional_cost ~ domestic_wild, data = animal_rescues_interest)
+
+# Model statistics
+glance(nullmodel)
+
+#Coefficients
+summary(nullmodel)
+tidy(nullmodel, conf.int = TRUE)
+
+# Computing standardized beta coefficients
+nullmodel_standardized <- lm.beta(nullmodel)
+coef(nullmodel_standardized)
+```
+
 
