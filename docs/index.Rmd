@@ -4,7 +4,7 @@ author: "Tóth Mercédesz"
 output:
   html_document:
     toc: true
-    toc_depth: 1
+    toc_depth: 3
     toc_float: true
 editor_options: 
   chunk_output_type: console
@@ -94,7 +94,7 @@ library(lubridate)
 animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-06-29/animal_rescues.csv")
 ```
 
-# 🐾 Preparing the dataset, computing variables and visualizing them 🐾
+# 🐾 Preparation and EDA 🐾
 
 In this section I am going to look at the dataset, select the variables that I would like to work with, look for missing values and convert variables. Then, I am going to compute some variables. I will do exploratory data analysis as well via plotting.
 
@@ -158,8 +158,8 @@ summary(animal_rescues_interest)
 
 ### Computing day_or_night variable
 
-0 - day: 06:00 - 18:00
-1 - night: 18:01 - 05:59
+0 - day: 06:00 - 18:00;  
+1 - night: 18:01 - 05:59  
 
 ```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
@@ -201,8 +201,8 @@ ggplot(animal_rescues_interest, aes(day_or_night_forplots, fill = day_or_night_f
 
 ### Computing domestic_wild variable
 
-0: domestic (traditional pets and livestock)
-1: wild (including exotic animals kept as pets)
+0: domestic (traditional pets and livestock);  
+1: wild (including exotic animals kept as pets)  
 
 ```{r}
 levels(animal_rescues_interest$animal_group_parent)
@@ -262,8 +262,8 @@ ggplot(animal_rescues_interest, aes(domestic_wild_forplots, fill = domestic_wild
 
 ### Computing borough_inner_outer
 
-0: inner
-1: outer
+0: inner;  
+1: outer  
 
 ```{r}
 levels(animal_rescues_interest$borough)
@@ -486,7 +486,7 @@ print(rescues_change_comparison)
 
 Conclusion: Indeed, in 2020 there was an increase in animal rescues, especially in wild animal rescues.
 
-# 🐾 Looking for relationships between variables of interest 🐾
+# 🐾 Relationships between variables of interest 🐾
 
 ## Checking correlations
 
@@ -546,8 +546,8 @@ ggplot(animal_rescues_interest, aes(pump_hours_total, incident_notional_cost)) +
 
 In this section I am going to investigating whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model.
 
-Outcome variable: incident_notional_cost
-Predictor: domestic_wild
+Outcome variable: incident_notional_cost;  
+Predictor: domestic_wild  
 
 ## Fitting null model
 
@@ -921,7 +921,7 @@ vif(complexmodel_log)
 
 Still not perfect (maybe somewhat nicer plots). I will compare both the original, both the log transformed models' performance.
 
-# 🐾 Comparing the simple and the more complex models' performance 🐾
+# 🐾 Model comparison 🐾
 
 ## Comparing the original null model with the original complex model
 
