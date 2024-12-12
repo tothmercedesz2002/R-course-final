@@ -52,7 +52,7 @@ Codebook available [here.](https://github.com/rfordatascience/tidytuesday/blob/m
 In this analysis, I will:  
 - prepare the dataset, compute variables and visualize them;  
 - confirm the rise in rescues by plotting (also comparing domestic and wild animals);  
-- look for correlations between variables of interest;  
+- look for relationships between variables of interest;  
 - investigate whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model;  
 - investigate what other factors influence rescue cost with a more complex linear regression model;  
 - compare the simple and the more complex models' performance.
@@ -96,20 +96,26 @@ animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascienc
 
 # 🐾 Preparing the dataset, computing variables and visualizing them 🐾
 
+In this section I am going to look at the dataset, select the variables that I would like to work with, look for missing values and convert variables. Then, I am going to compute some variables. I will do exploratory data analysis as well via plotting.
+
 ## First look at the dataset, filtering data and converting variables
 
+### Checking dataset's structure and variables' type
+
 ```{r}
-# Checking structure and variables' type
-
 str(animal_rescues_raw)
+```
 
-# Selecting variables of interest
+### Selecting variables of interest
 
+```{r}
 animal_rescues_interest <- animal_rescues_raw %>%
   select(date_time_of_call, cal_year, pump_count, pump_hours_total, incident_notional_cost, animal_group_parent, borough)
+```
 
-# Looking for missing data
+### Looking for missing data
 
+```{r}
 sum(is.na(animal_rescues_interest))
 which(rowSums(is.na(animal_rescues_interest)) > 0)
 missing_info <- animal_rescues_interest[c(4138, 4165, 4246, 4709, 5897, 6339, 6768, 7072, 7478), ]
@@ -119,17 +125,21 @@ unique(animal_rescues_interest$pump_count)
 unique(animal_rescues_interest$pump_hours_total)
 unique(animal_rescues_interest$incident_notional_cost)
 unique(animal_rescues_interest$animal_group_parent)
+```
 
-# Filtering rows with missing values and "NULL" values
+### Filtering rows with missing values and "NULL" values
 
+```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
   filter(!is.na(borough)) %>%
   filter(pump_count != "NULL") %>%
   filter(pump_hours_total != "NULL") %>%
   filter(incident_notional_cost != "NULL")
+```
 
-# Converting variables
+### Converting variables
 
+```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     date_time_of_call = dmy_hm(date_time_of_call),
@@ -146,20 +156,23 @@ summary(animal_rescues_interest)
 
 ## Computing day_or_night variable and visualization
 
-```{r}
-# Computing day_or_night variable
-# 0 - day: 06:00 - 18:00
-# 1 - night: 18:01 - 05:59
+### Computing day_or_night variable
 
+0 - day: 06:00 - 18:00
+1 - night: 18:01 - 05:59
+
+```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     day_or_night = case_when(
       hour(date_time_of_call) >= 6 & hour(date_time_of_call) < 18 ~ 0,
       TRUE ~ 1)
   )
+```
 
-# Creating an extra variable for plotting
+### Creating an extra variable for plotting
 
+```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     day_or_night_forplots = factor(
@@ -167,9 +180,11 @@ animal_rescues_interest <- animal_rescues_interest %>%
       levels = c(0, 1),
       labels = c("Day", "Night"))
   )
+```
 
-# Checking and comparing counts of day and night animal rescues
+### Checking and comparing counts of day and night animal rescues via plotting
 
+```{r}
 ggplot(animal_rescues_interest, aes(day_or_night_forplots, fill = day_or_night_forplots)) +
   geom_bar() +
   labs(
@@ -184,11 +199,12 @@ ggplot(animal_rescues_interest, aes(day_or_night_forplots, fill = day_or_night_f
 
 ## Computing domestic_wild variable and visualization
 
-```{r}
-# Computing domestic_wild variable
-# 0: domestic (traditional pets and livestock)
-# 1: wild (including exotic animals kept as pets)
+### Computing domestic_wild variable
 
+0: domestic (traditional pets and livestock)
+1: wild (including exotic animals kept as pets)
+
+```{r}
 levels(animal_rescues_interest$animal_group_parent)
 
 animal_rescues_interest <- animal_rescues_interest %>%
@@ -213,9 +229,11 @@ animal_rescues_interest <- animal_rescues_interest %>%
 
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(domestic_wild = as.factor(domestic_wild))
+```
 
-# Creating an extra variable for plotting
+### Creating an extra variable for plotting
 
+```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     domestic_wild_forplots = factor(
@@ -223,9 +241,11 @@ animal_rescues_interest <- animal_rescues_interest %>%
       levels = c(0, 1),
       labels = c("Domestic", "Wild"))
   )
+```
 
-# Checking and comparing counts of domestic and wild rescued animals
+### Checking and comparing counts of domestic and wild rescued animals via plotting
 
+```{r}
 ggplot(animal_rescues_interest, aes(domestic_wild_forplots, fill = domestic_wild_forplots)) +
   geom_bar() +
   labs(
@@ -240,11 +260,12 @@ ggplot(animal_rescues_interest, aes(domestic_wild_forplots, fill = domestic_wild
 
 ## Computing borough_inner_outer and visualization
 
-```{r}
-# Computing borough_inner_outer
-# 0: inner
-# 1: outer
+### Computing borough_inner_outer
 
+0: inner
+1: outer
+
+```{r}
 levels(animal_rescues_interest$borough)
 
 animal_rescues_interest <- animal_rescues_interest %>%
@@ -278,9 +299,11 @@ animal_rescues_interest <- animal_rescues_interest %>%
 
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(borough_inner_outer = as.factor(borough_inner_outer))
+```
 
-# Creating an extra variable for plotting
+### Creating an extra variable for plotting
 
+```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(
     borough_inner_outer_forplots = factor(
@@ -288,9 +311,11 @@ animal_rescues_interest <- animal_rescues_interest %>%
       levels = c(0, 1),
       labels = c("Inner", "Outer"))
   )
+```
 
-# Checking and comparing counts of animal rescues in inner and outer boroughs of London
+### Checking and comparing counts of animal rescues in inner and outer boroughs of London via plotting
 
+```{r}
 ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, fill = borough_inner_outer_forplots)) +
   geom_bar() +
   labs(
@@ -304,9 +329,10 @@ ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, fill = borough
 ```
 
 ## Exploring distribution of remaining variables of interest
-```{r}
-# pump_count
 
+### Exploring distribution of pump_count
+
+```{r}
 mean(animal_rescues_interest$pump_count)
 sd(animal_rescues_interest$pump_count)
 min(animal_rescues_interest$pump_count)
@@ -333,9 +359,11 @@ ggplot(animal_rescues_interest %>% filter(pump_count > 1), aes(pump_count)) +
   ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
+```
 
-# pump_hours_total
+### Exploring distribution of pump_hours_total
 
+```{r}
 mean(animal_rescues_interest$pump_hours_total)
 sd(animal_rescues_interest$pump_hours_total)
 min(animal_rescues_interest$pump_hours_total)
@@ -362,9 +390,11 @@ ggplot(animal_rescues_interest %>% filter(pump_hours_total > 3), aes(pump_hours_
   ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
+```
 
-# incident_notional_cost
+### Exploring distribution of incident_notional_cost
 
+```{r}
 mean(animal_rescues_interest$incident_notional_cost)
 sd(animal_rescues_interest$incident_notional_cost)
 min(animal_rescues_interest$incident_notional_cost)
@@ -391,23 +421,25 @@ ggplot(animal_rescues_interest %>% filter(incident_notional_cost > 1000), aes(in
   ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
-
-# Since the cost of the rescue is the main focus of my analysis (I want to know what causes the extreme values), I will leave the variable as it is (no transformations).
 ```
+
+Since the cost of the rescue is the main focus of my analysis (I want to know what causes the extreme values), I will not filter out the extreme values.
 
 # 🐾 Confirming the rise in rescues by plotting 🐾
 
+According to the dataset description, there was an increase in rescues in 2020, especially when it comes to wild animals. In this section, I will confirm this trend via plotting.
+
+## Grouping by year and calculating the count of rescues per year
+
 ```{r}
-# According to the dataset description, there was an increase in rescues in 2020, especially when it comes to wild animals. In this section, I will confirm this trend via plotting.
-
-# Grouping by year and calculating the count of rescues per year
-
 rescues_per_year <- animal_rescues_interest %>%
   group_by(cal_year, domestic_wild_forplots) %>%
   summarise(rescue_count = n())
+```
 
-# Plotting (both for domestic and wild animals)
+## Plotting (both for domestic and wild animals)
 
+```{r}
 ggplot(rescues_per_year, aes(x = cal_year, y = rescue_count)) +
   geom_line(color = "#ff69b4", size = 1) +
   geom_point() +
@@ -419,11 +451,13 @@ ggplot(rescues_per_year, aes(x = cal_year, y = rescue_count)) +
   ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
+```
 
-# Plotting (separate lines for domestic and wild animals)
+## Plotting (separate lines for domestic and wild animals)
 
-ggplot(rescues_per_year, aes(
-  x = cal_year, y = rescue_count, color = domestic_wild_forplots, group = domestic_wild_forplots)) +
+```{r}
+ggplot(rescues_per_year, 
+  aes(x = cal_year, y = rescue_count, color = domestic_wild_forplots, group = domestic_wild_forplots)) +
   geom_line(size = 1) +
   geom_point() +
   scale_x_continuous(breaks = 2009:2021) +
@@ -436,9 +470,11 @@ ggplot(rescues_per_year, aes(
   ) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
+```
 
-# Calculating increase
+### Calculating increase in domestic and wild animal rescues in 2020
 
+```{r}
 rescues_change_comparison <- rescues_per_year %>%
   filter(cal_year %in% c(2019, 2020)) %>%
   group_by(domestic_wild_forplots) %>%
@@ -446,11 +482,13 @@ rescues_change_comparison <- rescues_per_year %>%
   mutate(increase = `2020` - `2019`) 
 
 print(rescues_change_comparison)
-
-# Conclusion: Indeed, in 2020 there was an increase in animal rescues, especially in wild animal rescues.
 ```
 
-# 🐾 Looking for correlations between variables of interest 🐾
+Conclusion: Indeed, in 2020 there was an increase in animal rescues, especially in wild animal rescues.
+
+# 🐾 Looking for relationships between variables of interest 🐾
+
+## Checking correlations
 
 ```{r}
 correlations <- animal_rescues_interest %>%
@@ -463,44 +501,67 @@ correlations <- animal_rescues_interest %>%
   print()
 
 ggcorrplot(correlations)
-
-# The main focus is incident_notional_cost, the price of rescues.
-# Weak positive correlation with cal_year: rescues became more expensive over time
-# Strong positive correlation with pump_count: if more pumps are necessary, the rescue becomes more expensive
-# Strong positive correlation with pump_hours_total: longer rescues are more expensive
-# Weak negative correlation with day_or_night: night rescues are a bit cheaper (maybe due to less traffic?)
-# No significant correlation with domestic_wild (but domestic animals are little bit more expensive)
-# Weak positive correlation with borough_inner_outer: rescues in outer boroughs are slightly more expensive
 ```
 
-## Checking for linear relationships
+The main focus is incident_notional_cost, the price of rescues, so I will interpret the correlations concerning incident_notional_cost:
+
+1. Weak positive correlation with cal_year: rescues became more expensive over time  
+2. Strong positive correlation with pump_count: if more pumps are necessary, the rescue becomes more expensive  
+3. Strong positive correlation with pump_hours_total: longer rescues are more expensive  
+4. Weak negative correlation with day_or_night: night rescues are a bit cheaper (maybe due to less traffic?)  
+5. No significant correlation with domestic_wild (but domestic animals are little bit more expensive)  
+6. Weak positive correlation with borough_inner_outer: rescues in outer boroughs are slightly more expensive  
+
+
+## Checking for linear relationships between incident_notional_cost and other variables via plotting
+
+### Relationship with cal_year
 
 ```{r}
 ggplot(animal_rescues_interest, aes(cal_year, incident_notional_cost)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal()
+```
 
+### Relationship with pump_count
+
+```{r}
 ggplot(animal_rescues_interest, aes(pump_count, incident_notional_cost)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal()
+```
 
+### Relationship with pump_hours_total 
+
+```{r}
 ggplot(animal_rescues_interest, aes(pump_hours_total, incident_notional_cost)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal()
 ```
 
-# 🐾 Building null model - investigating whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model🐾
+# 🐾 Building null model 🐾
+
+In this section I am going to investigating whether non-domestic animals' rescue costs more money than domestic animals' rescue by fitting a linear regression model.
+
+Outcome variable: incident_notional_cost
+Predictor: domestic_wild
+
+## Fitting null model
 
 ```{r}
 nullmodel <- lm(incident_notional_cost ~ domestic_wild, data = animal_rescues_interest)
+```
 
+## Extracting statistics and coefficients of null model, computing standardized coefficients
+
+```{r}
 # Model statistics
 glance(nullmodel)
 
-#Coefficients
+# Extracting coefficients of null model
 summary(nullmodel)
 tidy(nullmodel, conf.int = TRUE)
 
@@ -509,8 +570,9 @@ nullmodel_standardized <- lm.beta(nullmodel)
 coef(nullmodel_standardized)
 ```
 
+## Extracting specific model test statistics of null model and putting them into a table
+
 ```{r}
-# Extracting specific model test statistics
 adjusted_r2_nullmodel <- glance(nullmodel) %>% pull(adj.r.squared)
 f_statistic_nullmodel <- glance(nullmodel) %>% pull(statistic)
 p_value_nullmodel <- glance(nullmodel) %>% pull(p.value)
@@ -522,8 +584,11 @@ model_stats_nullmodel <- tibble(
   Value = c(adjusted_r2_nullmodel, f_statistic_nullmodel, p_value_nullmodel, df_nullmodel, AIC_nullmodel))
 
 print(model_stats_nullmodel)
+```
 
-# Extracting coefficients
+## Extracting coefficients of null model and putting them into a table
+
+```{r}
 standardized_coefficients_nullmodel <- (coef(nullmodel_standardized))[-1]
   
 coeff_extracted_nullmodel <- tidy(nullmodel, conf.int = TRUE) %>%
@@ -533,16 +598,24 @@ coeff_extracted_nullmodel <- tidy(nullmodel, conf.int = TRUE) %>%
 print(coeff_extracted_nullmodel)
 ```
 
+## Checking the model
+
+### Cook's distance for null model and checking for influential outliers (Cook's distance > 1)
+
 ```{r}
-# Cook's distance for nullmodel and checking for influential outliers (Cook's distance > 1)
 cooks_distance_nullmodel <- cooks.distance(nullmodel)
 influential_outliers_nullmodel <- which(cooks_distance_nullmodel > 1)
 influential_outliers_nullmodel
 
-# Q-Q plot for normality check
+# There are no influential outliers according to the test.
+```
+
+### Q-Q plot for residual normality check
+
+```{r}
 autoplot(nullmodel, which = 2)
 
-## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+# Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(nullmodel)
 leverage_values[c(3541, 2399, 4201)]
 
@@ -550,21 +623,29 @@ leverage_values[c(3541, 2399, 4201)]
 animal_rescues_interest[3541, ]
 animal_rescues_interest[2399, ]
 animal_rescues_interest[4201, ]
-### Horses and a cat with high rescue costs.
+# Horses and a cat with high rescue costs.
+```
 
-# Residuals vs Fitted plot to check linearity and homoskedasticity
+### Residuals vs. fitted plot to check linearity and homoskedasticity
+
+```{r}
 autoplot(nullmodel, which = 1)
 ```
 
-## Null model with log transformed outcome variable
-```{r}
-# Due to assumption violations, I will try log transformation
+Due to assumption violations, I will try log-transforming the outcome variable (incident_notional_cost), and chech whether the model improves.
 
+##  Fitting null model with log-transformed outcome variable
+
+```{r}
 animal_rescues_interest <- animal_rescues_interest %>%
   mutate(log_incident_notional_cost = log(incident_notional_cost + 1))
 
 nullmodel_log <- lm(log_incident_notional_cost ~ domestic_wild, data = animal_rescues_interest)
+```
 
+## Extracting statistics and coefficients of log-transformed null model, computing standardized coefficients
+
+```{r}
 # Model statistics
 glance(nullmodel_log)
 
@@ -577,8 +658,9 @@ nullmodel_log_standardized <- lm.beta(nullmodel_log)
 coef(nullmodel_log_standardized)
 ```
 
+## Extracting specific model test statistics of log-transformed null model and putting them into a table
+
 ```{r}
-# Extracting specific model test statistics
 adjusted_r2_nullmodel_log <- glance(nullmodel_log) %>% pull(adj.r.squared)
 f_statistic_nullmodel_log <- glance(nullmodel_log) %>% pull(statistic)
 p_value_nullmodel_log <- glance(nullmodel_log) %>% pull(p.value)
@@ -590,8 +672,11 @@ model_stats_nullmodel_log <- tibble(
   Value = c(adjusted_r2_nullmodel_log, f_statistic_nullmodel_log, p_value_nullmodel_log, df_nullmodel_log, AIC_nullmodel_log))
 
 print(model_stats_nullmodel_log)
+```
 
-# Extracting coefficients
+## Extracting coefficients of log-transformed null model and putting them into a table
+
+```{r}
 standardized_coefficients_nullmodel_log <- (coef(nullmodel_log_standardized))[-1]
   
 coeff_extracted_nullmodel_log <- tidy(nullmodel_log, conf.int = TRUE) %>%
@@ -601,40 +686,24 @@ coeff_extracted_nullmodel_log <- tidy(nullmodel_log, conf.int = TRUE) %>%
 print(coeff_extracted_nullmodel_log)
 ```
 
-```{r}
-# Extracting specific model test statistics
-adjusted_r2_nullmodel <- glance(nullmodel) %>% pull(adj.r.squared)
-f_statistic_nullmodel <- glance(nullmodel) %>% pull(statistic)
-p_value_nullmodel <- glance(nullmodel) %>% pull(p.value)
-df_nullmodel <- glance(nullmodel) %>% pull(df)
-AIC_nullmodel <- glance(nullmodel) %>% pull(AIC)
+## Checking the model
 
-model_stats_nullmodel <- tibble(
-  Statistic = c("Adjusted R-squared", "F-statistic", "p-value", "Degrees of Freedom", "AIC"),
-  Value = c(adjusted_r2_nullmodel, f_statistic_nullmodel, p_value_nullmodel, df_nullmodel, AIC_nullmodel))
-
-print(model_stats_nullmodel)
-
-# Extracting coefficients
-standardized_coefficients_nullmodel <- (coef(nullmodel_standardized))[-1]
-  
-coeff_extracted_nullmodel <- tidy(nullmodel, conf.int = TRUE) %>%
-  select(term, estimate, conf.low, conf.high, p.value) %>%
-  mutate(standardized = c(NA, standardized_coefficients_nullmodel))
-
-print(coeff_extracted_nullmodel)
-```
+### Cook's distance for log-transformed null model and checking for influential outliers (Cook's distance > 1)
 
 ```{r}
-# Cook's distance for nulllmodel_log and checking for influential outliers (Cook's distance > 1)
 cooks_distance_nullmodel_log <- cooks.distance(nullmodel_log)
 influential_outliers_nullmodel_log <- which(cooks_distance_nullmodel_log > 1)
 influential_outliers_nullmodel_log
 
-# Q-Q plot for normality check
+# There are no influential outliers according to the test.
+```
+
+### Q-Q plot for residual normality check
+
+```{r}
 autoplot(nullmodel_log, which = 2)
 
-## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+# Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(nullmodel_log)
 leverage_values[c(5518, 2399, 420)]
 
@@ -642,15 +711,22 @@ leverage_values[c(5518, 2399, 420)]
 animal_rescues_interest[5518, ]
 animal_rescues_interest[2399, ]
 animal_rescues_interest[4201, ]
-### Horses and a dog with no rescue cost.
-
-# Residuals vs Fitted plot to check linearity and homoskedasticity
-autoplot(nullmodel_log, which = 1)
-
-# The model didn't get much better when it comes to assumptions, so I will stick to no log-transformation for easier interpretation. I don't want to get rid of the high rescue costs because they are my main interest.
+# Horses and a dog with no rescue cost.
 ```
 
-# 🐾 Building complex model - investigate what other factors influence rescue cost with a more complex linear regression model🐾
+### Residuals vs. fitted plot to check linearity and homoskedasticity
+
+```{r}
+autoplot(nullmodel_log, which = 1)
+```
+
+The model didn't get much better when it comes to assumptions. I will build the complex model and see what happens there.
+
+# 🐾 Building complex model 🐾
+
+In this section I will investigate what other factors influence rescue cost with a more complex linear regression model.
+
+Outcome: incident_notional_cost
 
 In the more complex model, I will include the following **predictors**:  
 - day_or_night: computed from date_time_of_call (0: day, 1: night);  
@@ -659,9 +735,15 @@ In the more complex model, I will include the following **predictors**:
 - domestic_wild: computed from animal_group_parent (0: domestic; 1: wild);  
 - borough_inner_outer: computed from borough (0: inner; 1: outer).
 
+## Fitting complex model
+
 ```{r}
 complexmodel <- lm(incident_notional_cost ~ day_or_night + pump_count + pump_hours_total + domestic_wild + borough_inner_outer, data = animal_rescues_interest)
+```
 
+## Extracting statistics and coefficients of oomplex model, computing standardized coefficients
+
+```{r}
 # Model statistics
 glance(complexmodel)
 
@@ -674,8 +756,9 @@ complexmodel_standardized <- lm.beta(complexmodel)
 coef(complexmodel_standardized)
 ```
 
+## Extracting specific model test statistics of complex model and putting them into a table
+
 ```{r}
-# Extracting specific model test statistics
 adjusted_r2_complexmodel <- glance(complexmodel) %>% pull(adj.r.squared)
 f_statistic_complexmodel <- glance(complexmodel) %>% pull(statistic)
 p_value_complexmodel <- glance(complexmodel) %>% pull(p.value)
@@ -687,8 +770,11 @@ model_stats_complexmodel <- tibble(
   Value = c(adjusted_r2_complexmodel, f_statistic_complexmodel, p_value_complexmodel, df_complexmodel, AIC_complexmodel))
 
 print(model_stats_complexmodel)
+```
 
-# Extracting coefficients
+## Extracting coefficients of complex model and putting them into a table
+
+```{r}
 standardized_coefficients_complexmodel <- (coef(complexmodel_standardized))[-1]
   
 coeff_extracted_complexmodel <- tidy(complexmodel, conf.int = TRUE) %>%
@@ -698,16 +784,24 @@ coeff_extracted_complexmodel <- tidy(complexmodel, conf.int = TRUE) %>%
 print(coeff_extracted_complexmodel)
 ```
 
+## Checking the model
+
+### Cook's distance for complex model and checking for influential outliers (Cook's distance > 1)
+
 ```{r}
-# Cook's distance for nulllmodel and checking for influential outliers (Cook's distance > 1)
 cooks_distance_complexmodel <- cooks.distance(complexmodel)
 influential_outliers_complexmodel <- which(cooks_distance_complexmodel > 1)
 influential_outliers_complexmodel
 
-# Q-Q plot for normality check
+# There are no influential outliers according to the test.
+```
+
+### Q-Q plot for residual normality check
+
+```{r}
 autoplot(complexmodel, which = 2)
 
-## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+# Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(complexmodel)
 leverage_values[c(1391, 6751, 4201)]
 
@@ -716,22 +810,33 @@ animal_rescues_interest[1391, ]
 animal_rescues_interest[6751, ]
 animal_rescues_interest[4201, ]
 ### A horse, a deer and a cat with high rescue costs.
-
-# Residuals vs Fitted plot to check linearity and homoskedasticity
-autoplot(complexmodel, which = 1)
-
-# Calculating VIF values for complex model
-vif(complexmodel)
-# vif < 5, so these are okay
-
-# The assumption checks still don't look nice, so I will try the log-transformation again with the complex model too.
 ```
 
-## Lets try log transforming again
+### Residuals vs. fitted plot to check linearity and homoskedasticity
+
+```{r}
+autoplot(complexmodel, which = 1)
+```
+
+### Calculating VIF values for complex model
+
+```{r}
+vif(complexmodel)
+
+# VIF < 5, so these are okay
+```
+
+The assumption checks still don't look nice, so I will try the log-transformation with the complex model too.
+
+## Fitting log-transformed complex model
 
 ```{r}
 complexmodel_log <- lm(log_incident_notional_cost ~ day_or_night + pump_count + pump_hours_total + domestic_wild + borough_inner_outer, data = animal_rescues_interest)
+```
 
+## Extracting statistics and coefficients of log-transformed complex model, computing standardized coefficients
+
+```{r}
 # Model statistics
 glance(complexmodel_log)
 
@@ -744,8 +849,9 @@ complexmodel_log_standardized <- lm.beta(complexmodel_log)
 coef(complexmodel_log_standardized)
 ```
 
+## Extracting specific model test statistics of log-transformed complex model and putting them into a table
+
 ```{r}
-# Extracting specific model test statistics
 adjusted_r2_complexmodel_log <- glance(complexmodel_log) %>% pull(adj.r.squared)
 f_statistic_complexmodel_log <- glance(complexmodel_log) %>% pull(statistic)
 p_value_complexmodel_log <- glance(complexmodel) %>% pull(p.value)
@@ -757,8 +863,11 @@ model_stats_complexmodel_log <- tibble(
   Value = c(adjusted_r2_complexmodel_log, f_statistic_complexmodel_log, p_value_complexmodel_log, df_complexmodel_log, AIC_complexmodel_log))
 
 print(model_stats_complexmodel_log)
+```
 
-# Extracting coefficients
+## Extracting coefficients of log-transformed complex model and putting them into a table
+
+```{r}
 standardized_coefficients_complexmodel_log <- (coef(complexmodel_log_standardized))[-1]
   
 coeff_extracted_complexmodel_log <- tidy(complexmodel_log, conf.int = TRUE) %>%
@@ -768,108 +877,139 @@ coeff_extracted_complexmodel_log <- tidy(complexmodel_log, conf.int = TRUE) %>%
 print(coeff_extracted_complexmodel_log)
 ```
 
+## Checking the model
+
+### Cook's distance for log-transformed complex model and checking for influential outliers (Cook's distance > 1)
+
 ```{r}
-# Cook's distance for nulllmodel and checking for influential outliers (Cook's distance > 1)
 cooks_distance_complexmodel_log <- cooks.distance(complexmodel_log)
 influential_outliers_complexmodel_log <- which(cooks_distance_complexmodel_log > 1)
 influential_outliers_complexmodel_log
-# We have already seen these animals before, they had high rescue costs.
 
-# Q-Q plot for normality check
+# We have already seen these animals before, they had high rescue costs.
+```
+
+### Q-Q plot for residual normality check
+
+```{r}
 autoplot(complexmodel_log, which = 2)
 
-## Compute leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
+# Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(complexmodel_log)
 leverage_values[c(5518, 2399, 4201)]
 
-## Viewing observations that might be influential
+# Viewing observations that might be influential
 animal_rescues_interest[5518, ]
 animal_rescues_interest[2399, ]
 animal_rescues_interest[4201, ]
-### High rescue costs or no cost.
-
-# Residuals vs Fitted plot to check linearity and homoskedasticity
-autoplot(complexmodel_log, which = 1)
-
-# Calculating VIF values for complex model
-vif(complexmodel_log)
-# vif < 5, so these are okay
-
-# Still not perfect (maybe somewhat nicer plots). I will compare both the original, both the log transformed models' performance.
+# High rescue costs or no cost.
 ```
 
-🐾 Compare the simple and the more complex models' performance 🐾
-```{r}
-# These are the original models.
+### Residuals vs. fitted plot to check linearity and homoskedasticity
 
-# Nullmodel stats
+```{r}
+autoplot(complexmodel_log, which = 1)
+```
+
+### Calculating VIF values for log-transformed complex model
+
+```{r}
+vif(complexmodel_log)
+
+# VIF < 5, so these are okay
+```
+
+Still not perfect (maybe somewhat nicer plots). I will compare both the original, both the log transformed models' performance.
+
+# 🐾 Comparing the simple and the more complex models' performance 🐾
+
+## Comparing the original null model with the original complex model
+
+### Comparing model stats (AIC, F-statistic, p-value)
+
+```{r}
+# Null model stats
 model_stats_nullmodel
 
-# COmplex model stats
+# Complex model stats
 model_stats_complexmodel
 
-# Comparing AIC values: the complex model has lower AIC (better)
+# Comparing AIC-values: the complex model has lower AIC (better)
 AIC_nullmodel
 AIC_complexmodel
 
-# Comparing F values of the models: the complex model has higher F statistic (better)
+# Comparing F-values of the models: the complex model has higher F-statistic (better)
 f_statistic_nullmodel
 f_statistic_complexmodel
 
-# Comparing p values of the models: the complex model has lower p value (better)
+# Comparing p-values of the models: the complex model has lower p-value (better)
 p_value_nullmodel
 p_value_complexmodel
-
-# Coefficients
-coeff_extracted_nullmodel
-coeff_extracted_complexmodel
-
-# In the null model, the animal type was not a significant predictor of rescue cost.
-# In the more complex model:
-## day_or_night: significant predicor (night rescues more expensive)
-## pump_count: significant preditor (more pumps - less expensive)
-## pump_hours_total: significant predictor (longer rescue - more expensive)
-## domestic_wild: significant predictor (wild animals - more expensive)
-## borough_inner_outer: not significant (outer borough - cheaper)
-
-# Compared to the correlations, controlling for other factors as well, the picture became more detailed. For example, in the regression model, more pumps lead to smaller costs. That might be because the model also controls for the length of the rescue, which might be decreased if more pumps are working. Also, at night, maybe less pumps are available. In the regression, wild animal rescues and outer borough rescues were also associated with higher costs (the correlations were either weak or not significant in these cases).
 ```
 
-```{r}
-# These are the log transformed models
+The complex model seems to have better performance, because it has lower AIC and p-value and higher F-statistic.
 
-# Nullmodel stats
+### Coefficient interpretation
+
+```{r}
+coeff_extracted_nullmodel
+coeff_extracted_complexmodel
+```
+
+In the null model, the animal type was not a significant predictor of rescue cost.
+
+In the more complex model:  
+- day_or_night: significant predicor (night rescues more expensive)  
+- pump_count: significant preditor (more pumps - less expensive)  
+- pump_hours_total: significant predictor (longer rescue - more expensive)  
+- domestic_wild: significant predictor (wild animals - more expensive)  
+- borough_inner_outer: not significant (outer borough - cheaper)  
+
+Compared to the correlations, controlling for other factors as well, the picture became more detailed. For example, in the regression model, more pumps lead to smaller costs. That might be because the model also controls for the length of the rescue, which might be decreased if more pumps are working. Also, at night, maybe less pumps are available. In the regression, wild animal rescues and outer borough rescues were also associated with higher costs (the correlations were either weak or not significant in these cases).
+
+## Comparing the log-transformed null model with the log-transformed complex model
+
+### Comparing model stats (AIC, F-statistic, p-value)
+
+```{r}
+# Null model stats
 model_stats_nullmodel_log
 
-# COmplex model stats
+# Complex model stats
 model_stats_complexmodel_log
 
-# Comparing AIC values: the complex model has lower AIC (better)
+# Comparing AIC-values: the complex model has lower AIC (better)
 # Both are better than the original models without log-transformation.
 AIC_nullmodel_log
 AIC_complexmodel_log
 
-# Comparing F values of the models: the complex model has higher F statistic (better)
-# The original complex model has higher F value
+# Comparing F-values of the models: the complex model has higher F-statistic (better)
+# The original complex model has higher F-value
 f_statistic_nullmodel_log
 f_statistic_complexmodel_log
 
-# Comparing p values of the models: the complex model has lower p value (better)
-# Log-transformed nullmodel has lower p value than original, the complex models are both p = 0
+# Comparing p-values of the models: the complex model has lower p-value (better)
+# Log-transformed null model has lower p-value than original, the complex models are both p = 0
 p_value_nullmodel_log
 p_value_complexmodel_log
+```
 
-# Coefficients
+The complex model seems to have better performance, because it has lower AIC and p-value and higher F-statistic. Compared to the original models, the log-transformed models don't outperform them definitely.
+
+### Coefficient interpretation
+
+```{r}
 coeff_extracted_nullmodel_log
 coeff_extracted_complexmodel_log
-
-# In the null model, the animal type was not a significant predictor of rescue cost.
-# In the more complex model:
-## day_or_night: not significant
-## pump_count: significant preditor (more pumps - less expensive)
-## pump_hours_total: significant predictor (longer rescue - more expensive)
-## domestic_wild: significant predictor (wild animals - more expensive)
-## borough_inner_outer: not significant
-
-# The coefficients' results are similar to the the results of the original models.
 ```
+
+In the null model, the animal type was not a significant predictor of rescue cost.
+
+In the more complex model:  
+- day_or_night: not significant  
+- pump_count: significant predictor (more pumps - less expensive)  
+- pump_hours_total: significant predictor (longer rescue - more expensive)  
+- domestic_wild: significant predictor (wild animals - more expensive)  
+- borough_inner_outer: not significant  
+
+The coefficients' results are similar to the the results of the original models.
