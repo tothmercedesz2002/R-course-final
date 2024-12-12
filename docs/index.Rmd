@@ -8,7 +8,39 @@ output:
     toc_float: true
 editor_options: 
   chunk_output_type: console
+geometry: margin=1in
 ---
+
+<style>
+h1 {
+  text-align: center;
+  font-size: 22pt;
+  line-height: 1.5;
+}
+.author {
+  text-align: right;
+  font-size: 20pt;
+  line-height: 1.5;
+}
+
+body {
+  text-align: justify;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+h2 {
+  text-align: left
+  font-size: 20px;
+  line-height: 1.5;
+}
+}
+h3 {
+  text-align: left
+  font-size: 18pt
+  line-height: 1.5;
+}
+</style>
+
 # 🐾 About the dataset 🐾
 
 The dataset includes data about the London Fire Brigade's **animal rescues** since **January 2009**. As provided in the official dataset description, in **2020**, there was a **20% increase** in rescues compared to 2019. The biggest increase was observed among **non-domestic animals**.
