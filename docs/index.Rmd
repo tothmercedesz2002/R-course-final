@@ -45,7 +45,7 @@ h3 {
 
 The dataset includes data about the London Fire Brigade's **animal rescues** since **January 2009**. As provided in the official dataset description, in **2020**, there was a **20% increase** in rescues compared to 2019. The biggest increase was observed among **non-domestic animals**.
 
-Codebook available [here.](https://github.com/rfordatascience/tidytuesday/blob/main/data/2021/2021-06-29/readme.md)
+The **codebook** is available [here.](https://github.com/rfordatascience/tidytuesday/blob/main/data/2021/2021-06-29/readme.md)
 
 # 🐾 Goals of this analysis 🐾
 
@@ -58,6 +58,7 @@ In this analysis, I will:
 - compare the simple and the more complex models' performance.
 
 In both models, the **outcome** variable will be incident_notional_cost.
+My hypothesis is that **rescuing non-domestic animals is more expensive **.
 
 In the more complex model, I will include the following **predictors**:  
 - day_or_night: computed from date_time_of_call (0: day, 1: night);  
@@ -66,7 +67,7 @@ In the more complex model, I will include the following **predictors**:
 - domestic_wild: computed from animal_group_parent (0: domestic; 1: wild);  
 - borough_inner_outer: computed from borough based on [Wikipedia](https://en.wikipedia.org/wiki/London_boroughs) (0: inner; 1: outer).
 
-See the whole repository made for this project [here.](https://github.com/tothmercedesz2002/R-course-final)
+**See the whole repository made for this project [here.](https://github.com/tothmercedesz2002/R-course-final)**
 
 ![*Photo by Scott Walsh on Unsplash*](https://images.unsplash.com/photo-1500479694472-551d1fb6258d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
 
@@ -186,7 +187,7 @@ animal_rescues_interest <- animal_rescues_interest %>%
 
 ```{r}
 ggplot(animal_rescues_interest, 
-  aes(day_or_night_forplots, fill = day_or_night_forplots, color = "black")) +
+  aes(day_or_night_forplots, fill = day_or_night_forplots)) +
   geom_bar() +
   labs(
     x = "Time of day",
@@ -248,7 +249,7 @@ animal_rescues_interest <- animal_rescues_interest %>%
 
 ```{r}
 ggplot(animal_rescues_interest, 
-  aes(domestic_wild_forplots, fill = domestic_wild_forplots, color = "black")) +
+  aes(domestic_wild_forplots, fill = domestic_wild_forplots)) +
   geom_bar() +
   labs(
     x = "Type of animal",
@@ -319,7 +320,7 @@ animal_rescues_interest <- animal_rescues_interest %>%
 
 ```{r}
 ggplot(animal_rescues_interest, 
-  aes(borough_inner_outer_forplots, fill = borough_inner_outer_forplots, color = "black")) +
+  aes(borough_inner_outer_forplots, fill = borough_inner_outer_forplots)) +
   geom_bar() +
   labs(
     x = "Type of borough",
@@ -342,7 +343,7 @@ min(animal_rescues_interest$pump_count)
 max(animal_rescues_interest$pump_count)
 
 ggplot(animal_rescues_interest, aes(pump_count)) +
-  geom_histogram(binwidth = 1, fill = "#e6e6fa", color = "black") +
+  geom_histogram(binwidth = 1, fill = "#800080") +
   labs(
     x = "Number of pumps",
     y = "Count",
@@ -354,7 +355,7 @@ ggplot(animal_rescues_interest, aes(pump_count)) +
 # Due to pump_count = 1 overwhelming the plot, here is another plot with pump_count > 1
 
 ggplot(animal_rescues_interest %>% filter(pump_count > 1), aes(pump_count)) +
-  geom_histogram(binwidth = 1, fill = "#e6e6fa", color = "black") +
+  geom_histogram(binwidth = 1, fill = "#800080") +
   labs(
     x = "Number of pumps",
     y = "Count",
@@ -373,7 +374,7 @@ min(animal_rescues_interest$pump_hours_total)
 max(animal_rescues_interest$pump_hours_total)
 
 ggplot(animal_rescues_interest, aes(pump_hours_total)) +
-  geom_histogram(binwidth = 1, fill = "#b0e0e6", color = "black") +
+  geom_histogram(binwidth = 1, fill = "#b0e0e6") +
   labs(
     x = "Hours",
     y = "Count",
@@ -385,7 +386,7 @@ ggplot(animal_rescues_interest, aes(pump_hours_total)) +
 # Due to low values overwhelming the plot, here is another plot with pump_hours_total > 3
 
 ggplot(animal_rescues_interest %>% filter(pump_hours_total > 3), aes(pump_hours_total)) +
-  geom_histogram(binwidth = 1, fill = "#b0e0e6", color = "black") +
+  geom_histogram(binwidth = 1, fill = "#b0e0e6") +
   labs(
     x = "Hours",
     y = "Count",
@@ -404,7 +405,7 @@ min(animal_rescues_interest$incident_notional_cost)
 max(animal_rescues_interest$incident_notional_cost)
 
 ggplot(animal_rescues_interest, aes(incident_notional_cost)) +
-  geom_histogram(binwidth = 100, fill = "#8fbc8f", color = "black") +
+  geom_histogram(binwidth = 100, fill = "#8fbc8f") +
   labs(
     x = "Notional cost of rescues",
     y = "Count",
@@ -416,7 +417,7 @@ ggplot(animal_rescues_interest, aes(incident_notional_cost)) +
 # Due to low values overwhelming the plot, here is another plot with incident_notional_cost > 1000
 
 ggplot(animal_rescues_interest %>% filter(incident_notional_cost > 1000), aes(incident_notional_cost)) +
-  geom_histogram(binwidth = 100, fill = "#8fbc8f", color = "black") +
+  geom_histogram(binwidth = 100, fill = "#8fbc8f") +
   labs(
     x = "Notional cost of rescues",
     y = "Count",
@@ -449,7 +450,7 @@ rescues_per_year_aggregated <- rescues_per_year %>%
   summarise(rescue_count = sum(rescue_count))
 
 # Plotting
-ggplot(rescues_per_year_aggregated, aes(x = cal_year, y = rescue_count, group = 1)) +
+ggplot(rescues_per_year_aggregated, aes(cal_year, rescue_count, group = 1)) +
   geom_line(color = "#ff69b4", linewidth = 1) +
   geom_point() +
   scale_x_continuous(breaks = 2009:2021) +
@@ -466,7 +467,7 @@ ggplot(rescues_per_year_aggregated, aes(x = cal_year, y = rescue_count, group = 
 
 ```{r}
 ggplot(rescues_per_year, 
-  aes(x = cal_year, y = rescue_count, color = domestic_wild_forplots, group = domestic_wild_forplots)) +
+  aes(cal_year, rescue_count, color = domestic_wild_forplots, group = domestic_wild_forplots)) +
   geom_line(linewidth = 1) +
   geom_point() +
   scale_x_continuous(breaks = 2009:2021) +
@@ -487,7 +488,7 @@ ggplot(rescues_per_year,
 rescues_change_comparison <- rescues_per_year %>%
   filter(cal_year %in% c(2019, 2020)) %>%
   group_by(domestic_wild_forplots) %>%
-  spread(key = cal_year, value = rescue_count) %>%
+  pivot_wider(names_from = cal_year, values_from = rescue_count) %>%
   mutate(increase = `2020` - `2019`) 
 
 print(rescues_change_comparison)
@@ -521,6 +522,31 @@ The main focus is incident_notional_cost, the price of rescues, so I will interp
 5. No significant correlation with domestic_wild (but domestic animals are little bit more expensive)  
 6. Weak positive correlation with borough_inner_outer: rescues in outer boroughs are slightly more expensive  
 
+## Checking for differences
+
+### Price differences according to animal types
+
+```{r}
+ggplot(animal_rescues_interest, aes(domestic_wild_forplots, incident_notional_cost)) +
+  geom_point() +
+  theme_minimal()
+```
+
+### Price differences according to day and night calls
+
+```{r}
+ggplot(animal_rescues_interest, aes(day_or_night_forplots, incident_notional_cost)) +
+  geom_point() +
+  theme_minimal()
+```
+
+### Price differences according to boroughs
+
+```{r}
+ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, incident_notional_cost)) +
+  geom_point() +
+  theme_minimal()
+```
 
 ## Checking for linear relationships 
 
@@ -1030,7 +1056,9 @@ In the more complex model:
 - domestic_wild: significant predictor (wild animals - more expensive)  
 - borough_inner_outer: not significant (outer borough - cheaper)  
 
-Compared to the correlations, controlling for other factors as well, the picture became more detailed. For example, in the regression model, more pumps lead to smaller costs. That might be because the model also controls for the length of the rescue, which might be decreased if more pumps are working. Also, at night, maybe less pumps are available. In the regression, wild animal rescues and outer borough rescues were also associated with higher costs (the correlations were either weak or not significant in these cases).
+Compared to the correlations, by controlling for other factors as well, the picture became more detailed. For example, in the regression model, more pumps lead to smaller costs. That might be because the model also controls for the length of the rescue, which might be decreased if more pumps are working. Also, at night, maybe fewer pumps are available. In the regression, wild animal rescues and outer borough rescues were also associated with higher costs (the correlations were either weak or insignificant in these cases).
+
+My hypothesis (rescuing non-domestic animals is more expensive) seem to be supported.
 
 ## Comparing the log-transformed null model with the log-transformed complex model
 
@@ -1077,4 +1105,4 @@ In the more complex model:
 - domestic_wild: significant predictor (wild animals - more expensive)  
 - borough_inner_outer: not significant  
 
-The coefficients' results are similar to the the results of the original models.
+The coefficients' results are similar to the results of the original models.
