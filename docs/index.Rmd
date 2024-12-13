@@ -29,14 +29,14 @@ body {
   line-height: 1.5;
 }
 h2 {
-  text-align: left
+  text-align: left;
   font-size: 20px;
   line-height: 1.5;
 }
 }
 h3 {
-  text-align: left
-  font-size: 18pt
+  text-align: left;
+  font-size: 18pt;
   line-height: 1.5;
 }
 </style>
@@ -843,7 +843,7 @@ In the more complex model, I will include the following **predictors**:
 complexmodel <- lm(incident_notional_cost ~ day_or_night + pump_count + pump_hours_total + domestic_wild + borough_inner_outer, data = animal_rescues_interest)
 ```
 
-## Extracting statistics and coefficients of oomplex model, computing standardized coefficients
+## Extracting statistics and coefficients of complex model, computing standardized coefficients
 
 ```{r}
 # Model statistics
