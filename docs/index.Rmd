@@ -58,7 +58,7 @@ In this analysis, I will:
 - compare the simple and the more complex models' performance.
 
 In both models, the **outcome** variable will be incident_notional_cost.  
-My hypothesis is that **rescuing non-domestic animals is more expensive **.
+My hypothesis is that **rescuing non-domestic animals is more expensive**.
 
 In the more complex model, I will include the following **predictors**:  
 - day_or_night: computed from date_time_of_call (0: day, 1: night);  
