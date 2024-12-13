@@ -185,7 +185,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
 ### Checking and comparing counts of day and night animal rescues via plotting
 
 ```{r}
-ggplot(animal_rescues_interest, aes(day_or_night_forplots, fill = day_or_night_forplots)) +
+ggplot(animal_rescues_interest, 
+  aes(day_or_night_forplots, fill = day_or_night_forplots, color = "black")) +
   geom_bar() +
   labs(
     x = "Time of day",
@@ -246,7 +247,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
 ### Checking and comparing counts of domestic and wild rescued animals via plotting
 
 ```{r}
-ggplot(animal_rescues_interest, aes(domestic_wild_forplots, fill = domestic_wild_forplots)) +
+ggplot(animal_rescues_interest, 
+  aes(domestic_wild_forplots, fill = domestic_wild_forplots, color = "black")) +
   geom_bar() +
   labs(
     x = "Type of animal",
@@ -316,7 +318,8 @@ animal_rescues_interest <- animal_rescues_interest %>%
 ### Checking and comparing counts of animal rescues in inner and outer boroughs of London via plotting
 
 ```{r}
-ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, fill = borough_inner_outer_forplots)) +
+ggplot(animal_rescues_interest, 
+  aes(borough_inner_outer_forplots, fill = borough_inner_outer_forplots, color = "black")) +
   geom_bar() +
   labs(
     x = "Type of borough",
@@ -440,8 +443,14 @@ rescues_per_year <- animal_rescues_interest %>%
 ## Plotting (both for domestic and wild animals)
 
 ```{r}
-ggplot(rescues_per_year, aes(x = cal_year, y = rescue_count)) +
-  geom_line(color = "#ff69b4", size = 1) +
+# Grouping by year and summarizing rescues
+rescues_per_year_aggregated <- rescues_per_year %>%
+  group_by(cal_year) %>%
+  summarise(rescue_count = sum(rescue_count))
+
+# Plotting
+ggplot(rescues_per_year_aggregated, aes(x = cal_year, y = rescue_count, group = 1)) +
+  geom_line(color = "#ff69b4", linewidth = 1) +
   geom_point() +
   scale_x_continuous(breaks = 2009:2021) +
   labs(
@@ -458,7 +467,7 @@ ggplot(rescues_per_year, aes(x = cal_year, y = rescue_count)) +
 ```{r}
 ggplot(rescues_per_year, 
   aes(x = cal_year, y = rescue_count, color = domestic_wild_forplots, group = domestic_wild_forplots)) +
-  geom_line(size = 1) +
+  geom_line(linewidth = 1) +
   geom_point() +
   scale_x_continuous(breaks = 2009:2021) +
   scale_color_manual(values = c("Domestic" = "pink", "Wild" = "purple")) +
@@ -513,7 +522,9 @@ The main focus is incident_notional_cost, the price of rescues, so I will interp
 6. Weak positive correlation with borough_inner_outer: rescues in outer boroughs are slightly more expensive  
 
 
-## Checking for linear relationships between incident_notional_cost and other variables via plotting
+## Checking for linear relationships 
+
+incident_notional_cost ~ other variables via plotting
 
 ### Relationship with cal_year
 
@@ -615,6 +626,8 @@ influential_outliers_nullmodel
 ```{r}
 autoplot(nullmodel, which = 2)
 
+# The plot shows that residuals are not normally distributed.
+
 # Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(nullmodel)
 leverage_values[c(3541, 2399, 4201)]
@@ -626,13 +639,25 @@ animal_rescues_interest[4201, ]
 # Horses and a cat with high rescue costs.
 ```
 
+### Independence of residuals (Durbin-Watson test)
+
+```{r}
+dwtest(nullmodel)
+
+# Positive autocorrelation between residuals.
+```
+
 ### Residuals vs. fitted plot to check linearity and homoskedasticity
 
 ```{r}
 autoplot(nullmodel, which = 1)
+
+# Linearity is not applicable because the only predictor is a factor.
+# There are outlier residuals.
+# Homoskedasticity is not violated.
 ```
 
-Due to assumption violations, I will try log-transforming the outcome variable (incident_notional_cost), and chech whether the model improves.
+Due to assumption violations, I will try log-transforming the outcome variable (incident_notional_cost), and check whether the model improves.
 
 ##  Fitting null model with log-transformed outcome variable
 
@@ -703,6 +728,8 @@ influential_outliers_nullmodel_log
 ```{r}
 autoplot(nullmodel_log, which = 2)
 
+# The plot shows that residuals are still not normally distributed.
+
 # Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(nullmodel_log)
 leverage_values[c(5518, 2399, 420)]
@@ -714,10 +741,23 @@ animal_rescues_interest[4201, ]
 # Horses and a dog with no rescue cost.
 ```
 
+### Independence of residuals (Durbin-Watson test)
+
+```{r}
+dwtest(nullmodel_log)
+
+# Positive autocorrelation between residuals.
+```
+
+
 ### Residuals vs. fitted plot to check linearity and homoskedasticity
 
 ```{r}
 autoplot(nullmodel_log, which = 1)
+
+# Linearity is not applicable because the only predictor is a factor.
+# There are outlier residuals.
+# Homoskedasticity is not violated.
 ```
 
 The model didn't get much better when it comes to assumptions. I will build the complex model and see what happens there.
@@ -801,6 +841,8 @@ influential_outliers_complexmodel
 ```{r}
 autoplot(complexmodel, which = 2)
 
+# The plot shows that residuals are not normally distributed.
+
 # Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(complexmodel)
 leverage_values[c(1391, 6751, 4201)]
@@ -816,6 +858,17 @@ animal_rescues_interest[4201, ]
 
 ```{r}
 autoplot(complexmodel, which = 1)
+
+# The bumpy line suggests that linearity is violated. 
+# The fanning pattern suggests that homoskedasticity is also violated.
+```
+
+### Independence of residuals (Durbin-Watson test)
+
+```{r}
+dwtest(complexmodel)
+
+# Positive autocorrelation between residuals.
 ```
 
 ### Calculating VIF values for complex model
@@ -894,6 +947,8 @@ influential_outliers_complexmodel_log
 ```{r}
 autoplot(complexmodel_log, which = 2)
 
+# The plot shows that residuals are still not normally distributed.
+
 # Computing leverage values and checking leverage for specific observations that deviate from the Q-Q plot line
 leverage_values <- hatvalues(complexmodel_log)
 leverage_values[c(5518, 2399, 4201)]
@@ -909,6 +964,16 @@ animal_rescues_interest[4201, ]
 
 ```{r}
 autoplot(complexmodel_log, which = 1)
+
+# The line is somewhat more linear but it still has a little bump. The outlier values seem to drag the line downwards.
+```
+
+### Independence of residuals (Durbin-Watson test)
+
+```{r}
+dwtest(complexmodel_log)
+
+# Positive autocorrelation between residuals.
 ```
 
 ### Calculating VIF values for log-transformed complex model
@@ -919,7 +984,7 @@ vif(complexmodel_log)
 # VIF < 5, so these are okay
 ```
 
-Still not perfect (maybe somewhat nicer plots). I will compare both the original, both the log transformed models' performance.
+Still not perfect (maybe some improvement compared to the original complex model). I will compare both the original, both the log transformed models' performance.
 
 # 🐾 Model comparison 🐾
 
