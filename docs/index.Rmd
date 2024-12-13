@@ -1143,4 +1143,10 @@ In the more complex model:
 
 The coefficients' results are similar to the results of the original models.
 
+# 🐾 Closing remarks 🐾
+
+I used OpenAI’s ChatGPT throughout this project for brainstorming ideas, generating code suggestions, and debugging. I always requested explanations for the generated code and tested it to make sure that it worked correctly and aligned with my analysis goals.
+
+Thank you for reading my report!
+
 ![*Photo by George Bonev on Unsplash*](https://images.unsplash.com/photo-1498579687545-d5a4fffb0a9e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
