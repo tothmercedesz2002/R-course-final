@@ -57,7 +57,7 @@ In this analysis, I will:
 - investigate what other factors influence rescue cost with a more complex linear regression model;  
 - compare the simple and the more complex models' performance.
 
-In both models, the **outcome** variable will be incident_notional_cost.
+In both models, the **outcome** variable will be incident_notional_cost.  
 My hypothesis is that **rescuing non-domestic animals is more expensive **.
 
 In the more complex model, I will include the following **predictors**:  
@@ -97,7 +97,7 @@ animal_rescues_raw <- read_csv("https://raw.githubusercontent.com/rfordatascienc
 
 # 🐾 Preparation and EDA 🐾
 
-In this section I am going to look at the dataset, select the variables that I would like to work with, look for missing values and convert variables. Then, I am going to compute some variables. I will do exploratory data analysis as well via plotting.
+In this section, I am going to look at the dataset, select the variables that I would like to work with, look for missing values, and convert variables. Then, I am going to compute some variables. I will do exploratory data analysis as well via plotting.
 
 ## First look at the dataset, filtering data and converting variables
 
@@ -524,12 +524,18 @@ The main focus is incident_notional_cost, the price of rescues, so I will interp
 
 ## Checking for differences
 
-### Price differences according to animal types
+### Price differences according to animal type
 
 ```{r}
 ggplot(animal_rescues_interest, aes(domestic_wild_forplots, incident_notional_cost)) +
   geom_point() +
-  theme_minimal()
+  labs(
+    x = "Animal type",
+    y = "Incident notional cost",
+    title = "Price differences according to animal type",
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ### Price differences according to day and night calls
@@ -537,7 +543,13 @@ ggplot(animal_rescues_interest, aes(domestic_wild_forplots, incident_notional_co
 ```{r}
 ggplot(animal_rescues_interest, aes(day_or_night_forplots, incident_notional_cost)) +
   geom_point() +
-  theme_minimal()
+  labs(
+    x = "Time of the day",
+    y = "Incident notional cost",
+    title = "Price differences according to day and night calls",
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ### Price differences according to boroughs
@@ -545,7 +557,13 @@ ggplot(animal_rescues_interest, aes(day_or_night_forplots, incident_notional_cos
 ```{r}
 ggplot(animal_rescues_interest, aes(borough_inner_outer_forplots, incident_notional_cost)) +
   geom_point() +
-  theme_minimal()
+  labs(
+    x = "Borough type",
+    y = "Incident notional cost",
+    title = "Price differences according to boroughs",
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ## Checking for linear relationships 
@@ -558,7 +576,13 @@ incident_notional_cost ~ other variables via plotting
 ggplot(animal_rescues_interest, aes(cal_year, incident_notional_cost)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  labs(
+    x = "Year",
+    y = "Incident notional cost",
+    title = "Relationship between year and rescue price",
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ### Relationship with pump_count
@@ -567,7 +591,13 @@ ggplot(animal_rescues_interest, aes(cal_year, incident_notional_cost)) +
 ggplot(animal_rescues_interest, aes(pump_count, incident_notional_cost)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  labs(
+    x = "Pump count",
+    y = "Incident notional cost",
+    title = "Relationship between pump count and rescue price",
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ### Relationship with pump_hours_total 
@@ -576,7 +606,13 @@ ggplot(animal_rescues_interest, aes(pump_count, incident_notional_cost)) +
 ggplot(animal_rescues_interest, aes(pump_hours_total, incident_notional_cost)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  labs(
+    x = "Rescue length",
+    y = "Incident notional cost",
+    title = "Relationship between year and pump_hours_total",
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 # 🐾 Building null model 🐾
